@@ -184,6 +184,68 @@ Route::get('/dashboard', function () {
     return view('auth.dashboard');
 })->middleware('auth')->name('dashboard');
 
+//===================================================================
+// ADMIN ROUTES
+// ===================================================================
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function() {
+    
+    // Admin Dashboard
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+    
+    // Users Management
+    Route::get('/users', function () {
+        $users = \App\Models\User::paginate(10);
+        return view('admin.users.index', compact('users'));
+    })->name('users.index');
+    
+    // User Edit
+    Route::get('/users/{user}/edit', function (\App\Models\User $user) {
+        return view('admin.users.edit', compact('user'));
+    })->name('users.edit');
+    
+    // User Update
+    Route::put('/users/{user}', function (\Illuminate\Http\Request $request, \App\Models\User $user) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'is_admin' => 'boolean',
+        ]);
+        
+        $user->update($request->only(['name', 'email', 'is_admin']));
+        
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+    })->name('users.update');
+    
+    // User Delete
+    Route::delete('/users/{user}', function (\App\Models\User $user) {
+        // Prevent admin from deleting themselves
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+        
+        $user->delete();
+        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+    })->name('users.destroy');
+    
+    // Packages Management (You'll need to create Package model later)
+    Route::get('/packages', function () {
+        return view('admin.packages.index');
+    })->name('packages.index');
+    
+    // Bookings Management
+    Route::get('/bookings', function () {
+        return view('admin.bookings.index');
+    })->name('bookings.index');
+    
+    // Hotels Management
+    Route::get('/hotels', function () {
+        return view('admin.hotels.index');
+    })->name('hotels.index');
+});
+
 // ===================================================================
 // 5. ADDITIONAL PAGES - UPDATED: Remove 'frontend.' prefix
 // ===================================================================

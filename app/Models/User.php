@@ -22,6 +22,7 @@ class User extends Authenticatable
         'last_name', 
         'email',
         'password',
+        'is_admin', // ✅ ADD THIS LINE
     ];
 
     /**
@@ -44,11 +45,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean', // ✅ ADD THIS LINE
         ];
     }
 
     public function getFullNameAttribute()
     {
         return $this->name . ($this->last_name ? ' ' . $this->last_name : '');
+    }
+
+    // ✅ ADD THIS METHOD
+    public function isAdmin()
+    {
+        return $this->is_admin === true || $this->is_admin === 1;
     }
 }
