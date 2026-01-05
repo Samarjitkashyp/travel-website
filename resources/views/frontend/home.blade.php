@@ -708,42 +708,166 @@
             </div>
             
             <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="card shadow-lg border-0">
+                <!-- Left Side: Google Map -->
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="card shadow-lg border-0 h-100">
+                        <div class="card-body p-4">
+                            <h4 class="mb-4">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>Our Location
+                            </h4>
+                            <!-- Google Map Embed -->
+                            <div class="map-container rounded overflow-hidden mb-4">
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3660.041692425675!2d91.74577417529312!3d26.14449627793077!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x375a5946b1e8d5c7%3A0x73c4f13fcb46c6a8!2sGuwahati%2C%20Assam!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+                                    width="100%" 
+                                    height="400" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    class="rounded">
+                                </iframe>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="contact-info">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="fas fa-map-marker-alt text-primary fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Our Office Address</h6>
+                                        <p class="text-muted mb-0">123 Travel Street, Tourism City, Guwahati, Assam 781001</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="fas fa-phone-alt text-primary fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Call Us</h6>
+                                        <p class="text-muted mb-0">+91 98765 43210<br>+91 98765 43211</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <i class="fas fa-envelope text-primary fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Email Us</h6>
+                                        <p class="text-muted mb-0">info@travelexplorer.com<br>support@travelexplorer.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Contact Form -->
+                <div class="col-lg-6">
+                    <div class="card shadow-lg border-0 h-100">
                         <div class="card-body p-5">
+                            <h4 class="mb-4">
+                                <i class="fas fa-paper-plane text-primary me-2"></i>Send Us a Message
+                            </h4>
+                            <p class="text-muted mb-4">Have questions about our travel services? Fill out the form below and we'll get back to you within 24 hours.</p>
+                            
                             <form id="contactForm">
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name" class="form-label">Full Name</label>
-                                            <input type="text" class="form-control" id="name" required>
+                                            <label for="name" class="form-label">
+                                                <i class="fas fa-user me-1 text-primary"></i>Full Name
+                                            </label>
+                                            <input type="text" class="form-control" id="name" placeholder="Enter your full name" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="email" class="form-label">Email Address</label>
-                                            <input type="email" class="form-control" id="email" required>
+                                            <label for="email" class="form-label">
+                                                <i class="fas fa-envelope me-1 text-primary"></i>Email Address
+                                            </label>
+                                            <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="phone" class="form-label">
+                                                <i class="fas fa-phone me-1 text-primary"></i>Phone Number
+                                            </label>
+                                            <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="subject" class="form-label">
+                                                <i class="fas fa-tag me-1 text-primary"></i>Subject
+                                            </label>
+                                            <select class="form-select" id="subject" required>
+                                                <option value="" selected disabled>Select a subject</option>
+                                                <option value="booking">Booking Inquiry</option>
+                                                <option value="package">Package Information</option>
+                                                <option value="hotel">Hotel Reservation</option>
+                                                <option value="payment">Payment Issue</option>
+                                                <option value="other">Other Inquiry</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label for="subject" class="form-label">Subject</label>
-                                            <input type="text" class="form-control" id="subject" required>
+                                            <label for="message" class="form-label">
+                                                <i class="fas fa-comment-dots me-1 text-primary"></i>Your Message
+                                            </label>
+                                            <textarea class="form-control" id="message" rows="4" placeholder="Type your message here..." required></textarea>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="form-group">
-                                            <label for="message" class="form-label">Message</label>
-                                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                                        <div class="form-check mb-4">
+                                            <input class="form-check-input" type="checkbox" id="newsletter">
+                                            <label class="form-check-label" for="newsletter">
+                                                Subscribe to our newsletter for travel tips & offers
+                                            </label>
                                         </div>
-                                    </div>
-                                    <div class="col-12">
                                         <button type="submit" class="btn btn-primary btn-lg w-100">
                                             <i class="fas fa-paper-plane me-2"></i>Send Message
                                         </button>
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Hours -->
+            <div class="row mt-5">
+                <div class="col-lg-12 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center mb-3 mb-md-0">
+                                    <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                                    <h5 class="fw-bold">Business Hours</h5>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="mb-2"><strong>Monday - Friday:</strong></p>
+                                            <p class="text-muted">9:00 AM - 8:00 PM</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="mb-2"><strong>Saturday - Sunday:</strong></p>
+                                            <p class="text-muted">10:00 AM - 6:00 PM</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        24/7 emergency support available for existing bookings
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

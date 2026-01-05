@@ -15,8 +15,11 @@ return new class extends Migration
             $table->integer('rating')->default(5);
             $table->text('content');
             $table->string('visited_location')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('user_type')->nullable();
+            $table->enum('status', ['active', 'inactive', 'pending'])->default('active');
+            $table->boolean('featured')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

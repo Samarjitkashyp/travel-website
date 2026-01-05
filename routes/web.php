@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +26,7 @@ use App\Http\Controllers\SearchController;
  * Purpose: Frontpage/Homepage display
  */
 Route::get('/', function () {
-    return view('frontend.home');
+    return view('home'); // Change from 'frontend.home' to 'home'
 })->name('home');
 
 /**
@@ -34,11 +36,11 @@ Route::get('/', function () {
  * Purpose: Single destination page with details, hotels, nearby areas
  */
 Route::get('/destination/{id}', function ($id) {
-    return view('frontend.destination', ['id' => $id]);
+    return view('destination', ['id' => $id]); // Remove 'frontend.' prefix
 })->name('destination.show');
 
 // ===================================================================
-// 2. HOTELS ROUTES - NEWLY ADDED
+// 2. HOTELS ROUTES
 // ===================================================================
 
 /**
@@ -48,7 +50,7 @@ Route::get('/destination/{id}', function ($id) {
  * Purpose: Display all hotels in grid view
  */
 Route::get('/hotels', function () {
-    return view('frontend.hotels');
+    return view('hotels'); // Remove 'frontend.' prefix
 })->name('hotels');
 
 /**
@@ -122,7 +124,7 @@ Route::get('/hotel/{slug}', function ($slug) {
         abort(404, 'Hotel not found');
     }
 
-    return view('frontend.hotel', [
+    return view('hotel', [ // Remove 'frontend.' prefix
         'hotel' => $hotels[$slug],
         'slug' => $slug
     ]);
@@ -165,41 +167,25 @@ Route::get('/search/results', [SearchController::class, 'searchResults'])->name(
 Route::get('/api/autocomplete/locations', [SearchController::class, 'autocomplete'])->name('autocomplete.locations');
 
 // ===================================================================
-// 4. AUTHENTICATION ROUTES
+// 4. AUTHENTICATION ROUTES - UPDATED: Use Controllers
 // ===================================================================
 
-/**
- * Login Page
- * URL: /login
- * Name: login
- * Purpose: User login page
- */
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// ===================================================================
+// 2. AUTHENTICATION ROUTES - SIRF YEH EK LINE
+// ===================================================================
+Auth::routes();
 
-/**
- * Register Page
- * URL: /register
- * Name: register
- * Purpose: User registration page
- */
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
 
-/**
- * Dashboard Page (Optional)
- * URL: /dashboard
- * Name: dashboard
- * Purpose: User dashboard after login
- */
+
+// ===================================================================
+// 3. DASHBOARD ROUTE (After login redirect)
+// ===================================================================
 Route::get('/dashboard', function () {
     return view('auth.dashboard');
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
 // ===================================================================
-// 5. ADDITIONAL PAGES
+// 5. ADDITIONAL PAGES - UPDATED: Remove 'frontend.' prefix
 // ===================================================================
 
 /**
@@ -209,7 +195,7 @@ Route::get('/dashboard', function () {
  * Purpose: Company information page
  */
 Route::get('/about', function () {
-    return view('frontend.about');
+    return view('about'); // Remove 'frontend.' prefix
 })->name('about');
 
 /**
@@ -219,7 +205,7 @@ Route::get('/about', function () {
  * Purpose: Contact information and form
  */
 Route::get('/contact', function () {
-    return view('frontend.contact');
+    return view('contact'); // Remove 'frontend.' prefix
 })->name('contact');
 
 /**
@@ -229,11 +215,11 @@ Route::get('/contact', function () {
  * Purpose: Travel packages listing page
  */
 Route::get('/packages', function () {
-    return view('frontend.packages');
+    return view('packages'); // Remove 'frontend.' prefix
 })->name('packages');
 
 // ===================================================================
-// 6. TEMPORARY DEMO ROUTES (For development only)
+// 6. TEMPORARY DEMO ROUTES (For development only) - UPDATED
 // ===================================================================
 
 /**
@@ -243,7 +229,7 @@ Route::get('/packages', function () {
  * Purpose: Demo hotels listing (temporary)
  */
 Route::get('/demo/hotels', function () {
-    return view('frontend.demo.hotels');
+    return view('demo.hotels'); // Remove 'frontend.' prefix
 })->name('demo.hotels');
 
 /**
@@ -253,7 +239,7 @@ Route::get('/demo/hotels', function () {
  * Purpose: Demo hotel detail page (temporary)
  */
 Route::get('/demo/hotel/{id}', function ($id) {
-    return view('frontend.demo.hotel', ['id' => $id]);
+    return view('demo.hotel', ['id' => $id]); // Remove 'frontend.' prefix
 })->name('demo.hotel');
 
 // ===================================================================
