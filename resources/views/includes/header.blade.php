@@ -34,7 +34,7 @@
                 <!-- Right Side: Auth Buttons & Additional Info -->
                 <div class="col-md-6 text-end">
                     <div class="top-bar-links">
-                        <!-- If user is not logged in, show login/register in top bar -->
+                        <!-- If user is not logged in, show login/register in top bar headder -->
                         @if(!auth()->check())
                             <a href="{{ route('login') }}" class="text-white me-3">
                                 <i class="fas fa-sign-in-alt me-1"></i>

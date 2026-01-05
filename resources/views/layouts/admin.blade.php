@@ -200,6 +200,11 @@
                     <i class="fas fa-users"></i>
                     <span>Users</span>
                 </a>
+
+                <a href="{{ route('admin.destinations.index') }}" class="nav-link {{ request()->routeIs('admin.destinations.*') ? 'active' : '' }}">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Destinations</span>
+                </a>
                 
                 <a href="{{ route('admin.packages.index') }}" class="nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
                     <i class="fas fa-suitcase"></i>

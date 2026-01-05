@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\DestinationController;
+use App\Models\Destination;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,17 +28,28 @@ use App\Http\Controllers\Auth\RegisterController;
  * Purpose: Frontpage/Homepage display
  */
 Route::get('/', function () {
-    return view('frontend.home'); // ✅ CHANGE 'home' to 'frontend.home'
+    // Get active destinations for homepage
+    $destinations = Destination::where('status', 'active')
+        ->orderBy('created_at', 'desc')
+        ->take(6)
+        ->get();
+    
+    return view('frontend.home', compact('destinations'));
 })->name('home');
 
 /**
  * Destination Detail Page
- * URL: /destination/{id}
+ * URL: /destination/{slug}
  * Name: destination.show
  * Purpose: Single destination page with details, hotels, nearby areas
  */
-Route::get('/destination/{id}', function ($id) {
-    return view('destination', ['id' => $id]); // Remove 'frontend.' prefix
+Route::get('/destination/{slug}', function ($slug) {
+    $destination = Destination::where('slug', $slug)
+        ->orWhere('id', $slug)
+        ->where('status', 'active')
+        ->firstOrFail();
+    
+    return view('frontend.destination', compact('destination'));
 })->name('destination.show');
 
 // ===================================================================
@@ -50,7 +63,7 @@ Route::get('/destination/{id}', function ($id) {
  * Purpose: Display all hotels in grid view
  */
 Route::get('/hotels', function () {
-    return view('hotels'); // Remove 'frontend.' prefix
+    return view('frontend.hotels');
 })->name('hotels');
 
 /**
@@ -124,7 +137,7 @@ Route::get('/hotel/{slug}', function ($slug) {
         abort(404, 'Hotel not found');
     }
 
-    return view('hotel', [ // Remove 'frontend.' prefix
+    return view('frontend.hotel', [
         'hotel' => $hotels[$slug],
         'slug' => $slug
     ]);
@@ -167,27 +180,20 @@ Route::get('/search/results', [SearchController::class, 'searchResults'])->name(
 Route::get('/api/autocomplete/locations', [SearchController::class, 'autocomplete'])->name('autocomplete.locations');
 
 // ===================================================================
-// 4. AUTHENTICATION ROUTES - UPDATED: Use Controllers
-// ===================================================================
-
-// ===================================================================
-// 2. AUTHENTICATION ROUTES - SIRF YEH EK LINE
+// 4. AUTHENTICATION ROUTES
 // ===================================================================
 Auth::routes();
 
-
-
 // ===================================================================
-// 3. DASHBOARD ROUTE (After login redirect)
+// 5. DASHBOARD ROUTE (After login redirect)
 // ===================================================================
 Route::get('/dashboard', function () {
     return view('auth.dashboard');
 })->middleware('auth')->name('dashboard');
 
-//===================================================================
-// ADMIN ROUTES
 // ===================================================================
-
+// 6. ADMIN ROUTES
+// ===================================================================
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function() {
     
     // Admin Dashboard
@@ -230,7 +236,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     })->name('users.destroy');
     
-    // Packages Management (You'll need to create Package model later)
+    // Packages Management
     Route::get('/packages', function () {
         return view('admin.packages.index');
     })->name('packages.index');
@@ -244,10 +250,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/hotels', function () {
         return view('admin.hotels.index');
     })->name('hotels.index');
+    
+    // ===================================================================
+    // DESTINATION MANAGEMENT ROUTES
+    // ===================================================================
+    Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
+    Route::get('/destinations/create', [DestinationController::class, 'create'])->name('destinations.create');
+    Route::post('/destinations', [DestinationController::class, 'store'])->name('destinations.store');
+    Route::get('/destinations/{destination}', [DestinationController::class, 'show'])->name('destinations.show');
+    Route::get('/destinations/{destination}/edit', [DestinationController::class, 'edit'])->name('destinations.edit');
+    Route::put('/destinations/{destination}', [DestinationController::class, 'update'])->name('destinations.update');
+    Route::delete('/destinations/{destination}', [DestinationController::class, 'destroy'])->name('destinations.destroy');
+    Route::post('/destinations/bulk', [DestinationController::class, 'bulkAction'])->name('destinations.bulk');
 });
 
 // ===================================================================
-// 5. ADDITIONAL PAGES - UPDATED: Remove 'frontend.' prefix
+// 7. ADDITIONAL PAGES
 // ===================================================================
 
 /**
@@ -257,7 +275,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
  * Purpose: Company information page
  */
 Route::get('/about', function () {
-    return view('about'); // Remove 'frontend.' prefix
+    return view('frontend.about');
 })->name('about');
 
 /**
@@ -267,7 +285,7 @@ Route::get('/about', function () {
  * Purpose: Contact information and form
  */
 Route::get('/contact', function () {
-    return view('contact'); // Remove 'frontend.' prefix
+    return view('frontend.contact');
 })->name('contact');
 
 /**
@@ -277,11 +295,11 @@ Route::get('/contact', function () {
  * Purpose: Travel packages listing page
  */
 Route::get('/packages', function () {
-    return view('packages'); // Remove 'frontend.' prefix
+    return view('frontend.packages');
 })->name('packages');
 
 // ===================================================================
-// 6. TEMPORARY DEMO ROUTES (For development only) - UPDATED
+// 8. TEMPORARY DEMO ROUTES (For development only)
 // ===================================================================
 
 /**
@@ -291,7 +309,7 @@ Route::get('/packages', function () {
  * Purpose: Demo hotels listing (temporary)
  */
 Route::get('/demo/hotels', function () {
-    return view('demo.hotels'); // Remove 'frontend.' prefix
+    return view('demo.hotels');
 })->name('demo.hotels');
 
 /**
@@ -301,11 +319,11 @@ Route::get('/demo/hotels', function () {
  * Purpose: Demo hotel detail page (temporary)
  */
 Route::get('/demo/hotel/{id}', function ($id) {
-    return view('demo.hotel', ['id' => $id]); // Remove 'frontend.' prefix
+    return view('demo.hotel', ['id' => $id]);
 })->name('demo.hotel');
 
 // ===================================================================
-// 7. HELPER FUNCTIONS (For demo/fallback purposes only)
+// 9. HELPER FUNCTIONS (For demo/fallback purposes only)
 // ===================================================================
 
 /**
@@ -369,17 +387,6 @@ if (!function_exists('getDemoResults')) {
                 'image' => 'https://images.unsplash.com/photo-1571896349842-3c7ad8e27b86?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
                 'description' => 'Hill station resort nestled in tea plantations.',
                 'url' => '/hotel/tea-country-munnar'
-            ],
-            [
-                'id' => 6,
-                'type' => 'package',
-                'title' => '7 Days Assam Tour',
-                'location' => 'Guwahati, Kaziranga, Shillong',
-                'rating' => 4.6,
-                'price' => '25,000',
-                'image' => 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'description' => 'Complete tour package covering major attractions of Assam.',
-                'url' => '#'
             ]
         ];
     }
@@ -427,137 +434,7 @@ if (!function_exists('getDemoHotels')) {
                 'image' => 'https://images.unsplash.com/photo-1571896349842-3c7ad8e27b86?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
                 'features' => ['Mountain View', 'Tea Plantation', 'Bonfire', 'Trekking'],
                 'description' => 'Peaceful retreat nestled in tea plantations with mountain views.'
-            ],
-            [
-                'id' => 4,
-                'slug' => 'rambagh-palace',
-                'name' => 'Rambagh Palace',
-                'location' => 'Palace Road, Jaipur',
-                'rating' => 4.9,
-                'price' => 12500,
-                'type' => 'Heritage Palace Hotel',
-                'image' => 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'features' => ['Royal Suites', 'Fine Dining', 'Spa & Wellness', 'Butler Service'],
-                'description' => 'Experience royal living in this beautifully converted palace.'
-            ],
-            [
-                'id' => 5,
-                'slug' => 'shimla-winter-retreat',
-                'name' => 'Shimla Winter Retreat',
-                'location' => 'The Mall Road, Shimla',
-                'rating' => 4.3,
-                'price' => 3800,
-                'type' => 'Colonial Style Hotel',
-                'image' => 'https://images.unsplash.com/photo-1551632436-cbf8dd35ad39?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'features' => ['Fireplace', 'Snow View', 'Library', 'Garden'],
-                'description' => 'Colonial era hotel with vintage charm and modern comforts.'
-            ],
-            [
-                'id' => 6,
-                'slug' => 'chennai-grand',
-                'name' => 'Chennai Grand Hotel',
-                'location' => 'Marina Beach Road, Chennai',
-                'rating' => 4.4,
-                'price' => 3500,
-                'type' => 'Business Hotel',
-                'image' => 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'features' => ['City View', 'Conference Rooms', 'Gym', 'Business Center'],
-                'description' => 'Modern business hotel with excellent connectivity and facilities.'
-            ],
-            [
-                'id' => 7,
-                'slug' => 'kerala-backwaters',
-                'name' => 'Kerala Backwaters Resort',
-                'location' => 'Alleppey, Kerala',
-                'rating' => 4.7,
-                'price' => 6500,
-                'type' => 'Backwater Resort',
-                'image' => 'https://images.unsplash.com/photo-1519925610903-0cad6a038a4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'features' => ['Backwater View', 'Houseboat Stay', 'Ayurveda Center', 'Cultural Shows'],
-                'description' => 'Serene resort overlooking the famous Kerala backwaters.'
-            ],
-            [
-                'id' => 8,
-                'slug' => 'rishikesh-yoga',
-                'name' => 'Rishikesh Yoga Retreat',
-                'location' => 'Ganga Riverside, Rishikesh',
-                'rating' => 4.6,
-                'price' => 2800,
-                'type' => 'Yoga Retreat',
-                'image' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                'features' => ['Yoga Classes', 'Meditation Hall', 'Vegetarian Food', 'Ganga Aarti'],
-                'description' => 'Spiritual retreat offering yoga and meditation programs by the Ganges.'
             ]
         ];
-    }
-}
-
-/**
- * Get demo active filters (Temporary function - fallback)
- * @param array $params Search parameters
- * @return array Active filters for display
- */
-if (!function_exists('getDemoFilters')) {
-    function getDemoFilters($params) {
-        $filters = [];
-        
-        if (!empty($params['q'])) {
-            $filters[] = 'Search: ' . $params['q'];
-        }
-        
-        if (!empty($params['location'])) {
-            $filters[] = 'Location: ' . $params['location'];
-        }
-        
-        if (!empty($params['category'])) {
-            $filters[] = 'Category: ' . $params['category'];
-        }
-        
-        if (!empty($params['min_price']) || !empty($params['max_price'])) {
-            $min = $params['min_price'] ?? '0';
-            $max = $params['max_price'] ?? 'Any';
-            $filters[] = 'Price: ₹' . $min . ' - ' . $max;
-        }
-        
-        return $filters;
-    }
-}
-
-/**
- * Get active filters helper (For advanced search - fallback)
- * @param array $params Search parameters
- * @return array Filter descriptions
- */
-if (!function_exists('getActiveFilters')) {
-    function getActiveFilters($params) {
-        $filters = [];
-        
-        if (!empty($params['location'])) {
-            $filters[] = 'Location: ' . $params['location'];
-        }
-        
-        if (!empty($params['categories'])) {
-            if (is_array($params['categories'])) {
-                $filters[] = 'Categories: ' . implode(', ', $params['categories']);
-            } else {
-                $filters[] = 'Category: ' . $params['categories'];
-            }
-        }
-        
-        if (!empty($params['check_in']) && !empty($params['check_out'])) {
-            $filters[] = 'Dates: ' . $params['check_in'] . ' to ' . $params['check_out'];
-        }
-        
-        if (!empty($params['min_price']) || !empty($params['max_price'])) {
-            $min = $params['min_price'] ?? '0';
-            $max = $params['max_price'] ?? 'Any';
-            $filters[] = 'Price Range: ₹' . $min . ' - ₹' . $max;
-        }
-        
-        if (!empty($params['min_rating']) && $params['min_rating'] > 0) {
-            $filters[] = 'Min Rating: ' . $params['min_rating'] . ' stars';
-        }
-        
-        return $filters;
     }
 }

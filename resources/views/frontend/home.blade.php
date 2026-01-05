@@ -95,7 +95,7 @@
                 <p>Discover our handpicked collection of amazing travel destinations</p>
             </div>
 
-            <!-- Search Filters - NOW WORKING -->
+            <!-- Search Filters -->
             <div class="row mb-5">
                 <div class="col-md-8 mx-auto">
                     <div class="card shadow-sm">
@@ -136,7 +136,11 @@
                             </div>
                             <div class="mt-3">
                                 <div id="filterStatus" class="text-center text-muted small">
-                                    Showing all destinations
+                                    @if(isset($destinations) && count($destinations) > 0)
+                                        Showing {{ count($destinations) }} destinations
+                                    @else
+                                        Showing demo destinations
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -144,151 +148,227 @@
                 </div>
             </div>
 
-            <!-- Destinations Grid with Self-Hosted Images -->
+            <!-- Destinations Grid with Dynamic Data -->
             <div class="row" id="destinationsGrid">
-                <!-- Destination 1: Guwahati (Assam, Heritage) -->
-                <div class="col-lg-4 col-md-6 mb-4 destination-item" 
-                    data-state="assam" 
-                    data-category="heritage"
-                    data-price="8500">
-                    <div class="destination-card animate__animated animate__fadeInUp">
-                        <div class="position-relative overflow-hidden">
-                            <!-- Self-hosted image -->
-                            <img src="{{ asset('images/destinations/guwahati.jpg') }}" 
-                                class="card-img-top" 
-                                alt="Guwahati, Assam"
-                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';">
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-primary">
-                                    <i class="fas fa-star me-1"></i>4.7
-                                </span>
-                            </div>
-                            <div class="position-absolute bottom-0 start-0 m-3">
-                                <span class="badge bg-success">Heritage</span>
+                @php
+                    $destinations = $destinations ?? [];
+                @endphp
+                
+                @if(count($destinations) > 0)
+                    <!-- Real destinations from database -->
+                    @foreach($destinations as $destination)
+                        <div class="col-lg-4 col-md-6 mb-4 destination-item" 
+                            data-state="{{ strtolower($destination->state) }}" 
+                            data-category="{{ strtolower($destination->category) }}"
+                            data-price="{{ $destination->price }}">
+                            <div class="destination-card animate__animated animate__fadeInUp">
+                                <div class="position-relative overflow-hidden">
+                                    <!-- Destination Image -->
+                                    @if($destination->image)
+                                        <img src="{{ asset('storage/' . $destination->image) }}" 
+                                            class="card-img-top" 
+                                            alt="{{ $destination->name }}"
+                                            style="height: 200px; object-fit: cover;"
+                                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';">
+                                    @else
+                                        <img src="https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                                            class="card-img-top" 
+                                            alt="{{ $destination->name }}"
+                                            style="height: 200px; object-fit: cover;">
+                                    @endif
+                                    
+                                    <div class="position-absolute top-0 end-0 m-3">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-star me-1"></i>{{ $destination->rating ?? '4.5' }}
+                                        </span>
+                                    </div>
+                                    <div class="position-absolute bottom-0 start-0 m-3">
+                                        @php
+                                            $badgeClass = 'bg-primary';
+                                            if($destination->category == 'Hill Station') $badgeClass = 'bg-warning text-dark';
+                                            elseif($destination->category == 'Beach') $badgeClass = 'bg-info';
+                                            elseif($destination->category == 'Heritage') $badgeClass = 'bg-success';
+                                            elseif($destination->category == 'Wildlife') $badgeClass = 'bg-dark';
+                                            elseif($destination->category == 'Adventure') $badgeClass = 'bg-danger';
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }}">
+                                            {{ $destination->category }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title fw-bold">{{ $destination->name }}</h5>
+                                        <span class="text-primary fw-bold">₹{{ number_format($destination->price) }}</span>
+                                    </div>
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                        {{ $destination->location }}, {{ $destination->state }}
+                                    </p>
+                                    <p class="card-text mb-4">
+                                        {{ Str::limit($destination->description, 100) }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{{ route('destination.show', $destination->slug) }}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                        <div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-hotel me-1"></i>
+                                                {{ $destination->hotels_count ?? 0 }} Hotels
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title fw-bold">Guwahati, Assam</h5>
-                                <span class="text-primary fw-bold">₹8,500</span>
+                    @endforeach
+                @else
+                    <!-- Demo destinations (fallback) -->
+                    <!-- Destination 1: Guwahati (Assam, Heritage) -->
+                    <div class="col-lg-4 col-md-6 mb-4 destination-item" 
+                        data-state="assam" 
+                        data-category="heritage"
+                        data-price="8500">
+                        <div class="destination-card animate__animated animate__fadeInUp">
+                            <div class="position-relative overflow-hidden">
+                                <img src="{{ asset('images/destinations/guwahati.jpg') }}" 
+                                    class="card-img-top" 
+                                    alt="Guwahati, Assam"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';"
+                                    style="height: 200px; object-fit: cover;">
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-star me-1"></i>4.7
+                                    </span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="badge bg-success">Heritage</span>
+                                </div>
                             </div>
-                            <p class="card-text text-muted mb-2">
-                                <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                Assam, North-East India
-                            </p>
-                            <p class="card-text mb-4">
-                                Gateway to North-East with Kamakhya Temple, Brahmaputra river, and rich cultural heritage.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ url('/destination/guwahati') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i>View Details
-                                </a>
-                                <div>
-                                    <small class="text-muted">
-                                        <i class="fas fa-hotel me-1"></i>
-                                        42 Hotels
-                                    </small>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fw-bold">Guwahati, Assam</h5>
+                                    <span class="text-primary fw-bold">₹8,500</span>
+                                </div>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    Assam, North-East India
+                                </p>
+                                <p class="card-text mb-4">
+                                    Gateway to North-East with Kamakhya Temple, Brahmaputra river, and rich cultural heritage.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url('/destination/guwahati') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-hotel me-1"></i>
+                                            42 Hotels
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Destination 2: Goa (Goa, Beach) -->
-                <div class="col-lg-4 col-md-6 mb-4 destination-item" 
-                    data-state="goa" 
-                    data-category="beach"
-                    data-price="12000">
-                    <div class="destination-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
-                        <div class="position-relative overflow-hidden">
-                            <img src="{{ asset('images/destinations/goa-destinations.avif') }}" 
-                                class="card-img-top" 
-                                alt="Goa Beach"
-                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';">
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-primary">
-                                    <i class="fas fa-star me-1"></i>4.8
-                                </span>
+                    <!-- Destination 2: Goa (Goa, Beach) -->
+                    <div class="col-lg-4 col-md-6 mb-4 destination-item" 
+                        data-state="goa" 
+                        data-category="beach"
+                        data-price="12000">
+                        <div class="destination-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                            <div class="position-relative overflow-hidden">
+                                <img src="{{ asset('images/destinations/goa-destinations.avif') }}" 
+                                    class="card-img-top" 
+                                    alt="Goa Beach"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';"
+                                    style="height: 200px; object-fit: cover;">
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-star me-1"></i>4.8
+                                    </span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="badge bg-info">Beach</span>
+                                </div>
                             </div>
-                            <div class="position-absolute bottom-0 start-0 m-3">
-                                <span class="badge bg-info">Beach</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title fw-bold">Goa Beaches</h5>
-                                <span class="text-primary fw-bold">₹12,000</span>
-                            </div>
-                            <p class="card-text text-muted mb-2">
-                                <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                Goa, West India
-                            </p>
-                            <p class="card-text mb-4">
-                                Famous for pristine beaches, Portuguese architecture, vibrant nightlife and seafood.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ url('/destination/goa') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i>View Details
-                                </a>
-                                <div>
-                                    <small class="text-muted">
-                                        <i class="fas fa-hotel me-1"></i>
-                                        68 Hotels
-                                    </small>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fw-bold">Goa Beaches</h5>
+                                    <span class="text-primary fw-bold">₹12,000</span>
+                                </div>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    Goa, West India
+                                </p>
+                                <p class="card-text mb-4">
+                                    Famous for pristine beaches, Portuguese architecture, vibrant nightlife and seafood.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url('/destination/goa') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-hotel me-1"></i>
+                                            68 Hotels
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Destination 3: Munnar (Kerala, Hill Station) -->
-                <div class="col-lg-4 col-md-6 mb-4 destination-item" 
-                    data-state="kerala" 
-                    data-category="hill"
-                    data-price="9500">
-                    <div class="destination-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
-                        <div class="position-relative overflow-hidden">
-                            <img src="{{ asset('images/destinations/Munnar_hillstation_kerala.jpg') }}" 
-                                class="card-img-top" 
-                                alt="Munnar"
-                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';">
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-primary">
-                                    <i class="fas fa-star me-1"></i>4.6
-                                </span>
+                    <!-- Destination 3: Munnar (Kerala, Hill Station) -->
+                    <div class="col-lg-4 col-md-6 mb-4 destination-item" 
+                        data-state="kerala" 
+                        data-category="hill"
+                        data-price="9500">
+                        <div class="destination-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                            <div class="position-relative overflow-hidden">
+                                <img src="{{ asset('images/destinations/Munnar_hillstation_kerala.jpg') }}" 
+                                    class="card-img-top" 
+                                    alt="Munnar"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';"
+                                    style="height: 200px; object-fit: cover;">
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-star me-1"></i>4.6
+                                    </span>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 m-3">
+                                    <span class="badge bg-warning text-dark">Hill Station</span>
+                                </div>
                             </div>
-                            <div class="position-absolute bottom-0 start-0 m-3">
-                                <span class="badge bg-warning text-dark">Hill Station</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title fw-bold">Munnar, Kerala</h5>
-                                <span class="text-primary fw-bold">₹9,500</span>
-                            </div>
-                            <p class="card-text text-muted mb-2">
-                                <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                                Kerala, South India
-                            </p>
-                            <p class="card-text mb-4">
-                                Beautiful hill station with tea plantations, waterfalls, and pleasant climate.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ url('/destination/munnar') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i>View Details
-                                </a>
-                                <div>
-                                    <small class="text-muted">
-                                        <i class="fas fa-hotel me-1"></i>
-                                        35 Hotels
-                                    </small>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title fw-bold">Munnar, Kerala</h5>
+                                    <span class="text-primary fw-bold">₹9,500</span>
+                                </div>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    Kerala, South India
+                                </p>
+                                <p class="card-text mb-4">
+                                    Beautiful hill station with tea plantations, waterfalls, and pleasant climate.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ url('/destination/munnar') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+                                    <div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-hotel me-1"></i>
+                                            35 Hotels
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Add remaining destinations similarly... -->
+                @endif
             </div>
 
             <!-- View More Button -->
