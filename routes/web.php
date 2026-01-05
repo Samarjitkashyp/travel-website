@@ -26,7 +26,7 @@ use App\Http\Controllers\Auth\RegisterController;
  * Purpose: Frontpage/Homepage display
  */
 Route::get('/', function () {
-    return view('home'); // Change from 'frontend.home' to 'home'
+    return view('frontend.home'); // ✅ CHANGE 'home' to 'frontend.home'
 })->name('home');
 
 /**

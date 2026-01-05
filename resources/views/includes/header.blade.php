@@ -38,7 +38,11 @@
                         @if(!auth()->check())
                             <a href="{{ route('login') }}" class="text-white me-3">
                                 <i class="fas fa-sign-in-alt me-1"></i>
-                                <small>Login</small>
+                                <small>User Login</small>
+                            </a>
+                            <a href="{{ route('admin.dashboard') }}" class="text-white me-3">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                <small>Admin Login</small>
                             </a>
                             <a href="{{ route('register') }}" class="text-white">
                                 <i class="fas fa-user-plus me-1"></i>

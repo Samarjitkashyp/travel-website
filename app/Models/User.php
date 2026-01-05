@@ -22,7 +22,7 @@ class User extends Authenticatable
         'last_name', 
         'email',
         'password',
-        'is_admin', // ✅ ADD THIS LINE
+        'is_admin', 
     ];
 
     /**
@@ -55,8 +55,18 @@ class User extends Authenticatable
     }
 
     // ✅ ADD THIS METHOD
+    // public function isAdmin()
+    // {
+    //     return $this->is_admin === true || $this->is_admin === 1;
+    // }
     public function isAdmin()
-    {
-        return $this->is_admin === true || $this->is_admin === 1;
-    }
+{
+    // Multiple checks for different data types
+    if ($this->is_admin === true) return true;
+    if ($this->is_admin === 1) return true;
+    if ($this->is_admin === '1') return true;
+    if ($this->is_admin === 'true') return true;
+    
+    return false;
+}
 }
