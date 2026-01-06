@@ -132,12 +132,16 @@
                             <h2 class="mb-4">
                                 <i class="fas fa-eye text-primary me-2"></i>Overview
                             </h2>
-                            <p class="lead">
-                                Guwahati, the gateway to North-East India, is a vibrant city nestled on the banks of the mighty Brahmaputra River. Known as the "City of Temples," it offers a perfect blend of ancient heritage and modern urban life.
-                            </p>
-                            <p>
-                                The city serves as the major economic and educational hub of the region. With its rich cultural heritage, ancient temples, and breathtaking natural beauty, Guwahati attracts tourists, pilgrims, and nature lovers alike.
-                            </p>
+                           
+                            <!-- ✅ Short Description -->
+                            <div class="lead summernote-content">
+                                {!! $destination->description !!}
+                            </div>
+
+                            <!-- ✅ Detailed Overview -->
+                            <div class="mt-4 summernote-content">
+                                {!! $destination->overview !!}
+                            </div>
                             
                             <!-- Key Highlights -->
                             <div class="row mt-4">

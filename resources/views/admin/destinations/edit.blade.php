@@ -160,7 +160,7 @@
                     <div class="mb-4">
                         <label for="description" class="form-label">Short Description *</label>
                         <textarea class="form-control @error('description') is-invalid @enderror" 
-                                  id="description" name="description" rows="3" required>{{ old('description', $destination->description) }}</textarea>
+                                  id="summernote-description" name="description" rows="3">{{ old('description', $destination->description) }}</textarea>
                         <small class="text-muted">Brief description for cards and listings</small>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -170,7 +170,7 @@
                     <div class="mb-4">
                         <label for="overview" class="form-label">Detailed Overview</label>
                         <textarea class="form-control @error('overview') is-invalid @enderror" 
-                                  id="overview" name="overview" rows="5">{{ old('overview', $destination->overview) }}</textarea>
+                                  id="summernote-overview" name="overview" rows="5">{{ old('overview', $destination->overview) }}</textarea>
                         <small class="text-muted">Detailed information about the destination</small>
                         @error('overview')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -448,6 +448,38 @@
 
 @section('scripts')
 <script>
+    // ✅ SUMMERNOTE EDITOR INITIALIZATION
+    $(document).ready(function() {
+        // Short Description Editor
+        $('#summernote-description').summernote({
+            height: 150,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            placeholder: 'Write short description here...'
+        });
+        
+        // Detailed Overview Editor
+        $('#summernote-overview').summernote({
+            height: 300,
+            toolbar: [
+                ['style', ['style', 'fontsize', 'color']],
+                ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph', 'height']],
+                ['insert', ['link', 'picture', 'video', 'table', 'hr']],
+                ['misc', ['undo', 'redo']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            placeholder: 'Write detailed overview here...'
+        });
+        
+        console.log('Summernote editors initialized successfully!');
+    });
+
     // Image Preview
     document.getElementById('image').addEventListener('change', function(e) {
         const file = e.target.files[0];

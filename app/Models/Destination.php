@@ -39,4 +39,6 @@ class Destination extends Model
         'nearby_areas' => 'array', // ✅ ADD THIS
         'travel_tips' => 'array', // ✅ ADD THIS
     ];
+
+    
 }

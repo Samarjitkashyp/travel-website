@@ -7,6 +7,7 @@ use App\Models\Destination;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+// use Purifier; // Agar package install kiya hai toh
 
 class DestinationController extends Controller
 {
@@ -54,8 +55,11 @@ class DestinationController extends Controller
             'price' => 'required|integer|min:0',
             'rating' => 'nullable|numeric|min:0|max:5',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'required|string',
-            'overview' => 'nullable|string',
+            
+            // ✅ 'string' validation HATA DEIN - HTML allow karein
+            'description' => 'required',
+            'overview' => 'nullable',
+            
             'hotels_count' => 'nullable|integer|min:0',
             'best_time' => 'nullable|string|max:100',
             'ideal_duration' => 'nullable|string|max:50',
@@ -71,6 +75,20 @@ class DestinationController extends Controller
             $imagePath = $request->file('image')->store('destinations', 'public');
             $validated['image'] = $imagePath;
         }
+
+        // ✅ Handle HTML content (SAFELY)
+        // Option 1: Basic strip_tags (Simple)
+        $validated['description'] = strip_tags($request->description, 
+            '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><span><div>');
+        
+        $validated['overview'] = strip_tags($request->overview,
+            '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><img><table><tr><td><th><div><span>');
+
+        /*
+        // Option 2: Agar Purifier install kiya hai
+        // $validated['description'] = Purifier::clean($request->description);
+        // $validated['overview'] = Purifier::clean($request->overview);
+        */
 
         // Handle JSON fields
         $validated['attractions'] = $this->processArrayInput($request->input('attractions', []));
@@ -126,8 +144,11 @@ class DestinationController extends Controller
             'price' => 'required|integer|min:0',
             'rating' => 'nullable|numeric|min:0|max:5',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'description' => 'required|string',
-            'overview' => 'nullable|string',
+            
+            // ✅ 'string' validation HATA DEIN
+            'description' => 'required',
+            'overview' => 'nullable',
+            
             'hotels_count' => 'nullable|integer|min:0',
             'best_time' => 'nullable|string|max:100',
             'ideal_duration' => 'nullable|string|max:50',
@@ -150,6 +171,13 @@ class DestinationController extends Controller
             $imagePath = $request->file('image')->store('destinations', 'public');
             $validated['image'] = $imagePath;
         }
+
+        // ✅ Handle HTML content (SAFELY)
+        $validated['description'] = strip_tags($request->description, 
+            '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><span><div>');
+        
+        $validated['overview'] = strip_tags($request->overview,
+            '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><img><table><tr><td><th><div><span>');
 
         // Handle JSON fields
         $validated['attractions'] = $this->processArrayInput($request->input('attractions', []));

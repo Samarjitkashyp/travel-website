@@ -206,7 +206,7 @@
                                         {{ $destination->location }}, {{ $destination->state }}
                                     </p>
                                     <p class="card-text mb-4">
-                                        {{ Str::limit($destination->description, 100) }}
+                                        {{ Str::limit(strip_tags($destination->description), 100) }}
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <a href="{{ route('destination.show', $destination->slug) }}" class="btn btn-primary btn-sm">

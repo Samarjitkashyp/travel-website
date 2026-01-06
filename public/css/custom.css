@@ -200,3 +200,74 @@ body {
         padding: 10px;
     }
 }
+
+
+
+
+/*  */
+/* Summernote content styling */
+    .summernote-content {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+    }
+    
+    .summernote-content p {
+        margin-bottom: 1rem;
+    }
+    
+    .summernote-content ul, .summernote-content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    
+    .summernote-content h1, .summernote-content h2, .summernote-content h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .summernote-content a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .summernote-content a:hover {
+        text-decoration: underline;
+    }
+    
+    .summernote-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .summernote-content table, .summernote-content th, .summernote-content td {
+        border: 1px solid #dee2e6;
+    }
+    
+    .summernote-content th, .summernote-content td {
+        padding: 0.5rem;
+    }
+
+    .summernote-content b,
+    .summernote-content strong {
+        font-weight: bold !important;
+    }
+    
+    .summernote-content i,
+    .summernote-content em {
+        font-style: italic !important;
+    }
+    
+    .summernote-content u {
+        text-decoration: underline !important;
+    }
+    
+    .summernote-content a {
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .summernote-content a:hover {
+        text-decoration: underline;
+    }
