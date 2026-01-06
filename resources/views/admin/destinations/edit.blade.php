@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <form action="{{ route('admin.destinations.update', $destination) }}" method="POST" enctype="multipart/form-data">
@@ -113,42 +113,100 @@
                     
                     <!-- Image Upload -->
                     <h5 class="mb-4">
-                        <i class="fas fa-image text-primary me-2"></i>Destination Image
+                        <i class="fas fa-image text-primary me-2"></i>Destination Images
                     </h5>
                     
-                    <div class="mb-4">
-                        <!-- Current Image -->
-                        @if($destination->image)
-                            <div class="mb-3">
-                                <label class="form-label">Current Image</label>
-                                <div>
-                                    <img src="{{ asset('storage/' . $destination->image) }}" 
-                                         alt="{{ $destination->name }}" 
-                                         class="img-thumbnail" 
-                                         style="max-height: 200px;">
-                                </div>
-                            </div>
-                        @endif
-                        
-                        <label for="image" class="form-label">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <!-- Current Main Image -->
                             @if($destination->image)
-                                Change Image (Optional)
-                            @else
-                                Upload Image
+                                <div class="mb-3">
+                                    <label class="form-label">Current Main Image</label>
+                                    <div>
+                                        <img src="{{ asset('storage/' . $destination->image) }}" 
+                                             alt="{{ $destination->name }}" 
+                                             class="img-thumbnail" 
+                                             style="max-height: 200px;">
+                                    </div>
+                                </div>
                             @endif
-                        </label>
-                        <input type="file" class="form-control @error('image') is-invalid @enderror" 
-                               id="image" name="image" accept="image/*">
-                        <small class="text-muted">Recommended size: 800x600px, Max: 2MB</small>
-                        @error('image')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                            
+                            <label for="image" class="form-label">
+                                @if($destination->image)
+                                    Change Main Image (Optional)
+                                @else
+                                    Upload Main Image
+                                @endif
+                            </label>
+                            <input type="file" class="form-control @error('image') is-invalid @enderror" 
+                                   id="image" name="image" accept="image/*">
+                            <small class="text-muted">Recommended size: 800x600px, Max: 2MB</small>
+                            @error('image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            
+                            <!-- Image Preview -->
+                            <div id="imagePreview" class="mt-3" style="display: none;">
+                                <label class="form-label">New Image Preview</label>
+                                <img id="previewImage" src="" alt="Preview" 
+                                     class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                        </div>
                         
-                        <!-- Image Preview -->
-                        <div id="imagePreview" class="mt-3" style="display: none;">
-                            <label class="form-label">New Image Preview</label>
-                            <img id="previewImage" src="" alt="Preview" 
-                                 class="img-thumbnail" style="max-height: 200px;">
+                        <div class="col-md-6">
+                            <!-- Current Hero Image -->
+                            @if($destination->hero_image)
+                                <div class="mb-3">
+                                    <label class="form-label">Current Hero Image</label>
+                                    <div>
+                                        <img src="{{ asset('storage/' . $destination->hero_image) }}" 
+                                             alt="{{ $destination->name }}" 
+                                             class="img-thumbnail" 
+                                             style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <label for="hero_image" class="form-label">
+                                @if($destination->hero_image)
+                                    Change Hero Image (Optional)
+                                @else
+                                    Upload Hero Image
+                                @endif
+                            </label>
+                            <input type="file" class="form-control @error('hero_image') is-invalid @enderror" 
+                                   id="hero_image" name="hero_image" accept="image/*">
+                            <small class="text-muted">Recommended: 1920x500px, Max: 5MB</small>
+                            @error('hero_image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            
+                            <!-- Hero Image Preview -->
+                            <div id="heroImagePreview" class="mt-3" style="display: none;">
+                                <label class="form-label">New Hero Image Preview</label>
+                                <img id="previewHeroImage" src="" alt="Hero Preview" 
+                                     class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Section -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-images text-primary me-2"></i>Hero Section Content
+                    </h5>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="hero_title" class="form-label">Hero Title</label>
+                            <input type="text" class="form-control" id="hero_title" name="hero_title" 
+                                   value="{{ old('hero_title', $destination->hero_title) }}" placeholder="e.g., Explore Guwahati">
+                            <small class="text-muted">Leave empty to use destination name</small>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="hero_subtitle" class="form-label">Hero Subtitle</label>
+                            <input type="text" class="form-control" id="hero_subtitle" name="hero_subtitle" 
+                                   value="{{ old('hero_subtitle', $destination->hero_subtitle) }}" placeholder="e.g., Gateway to North-East India">
                         </div>
                     </div>
                     
@@ -213,81 +271,663 @@
                         </div>
                     </div>
                     
-                    <!-- Array Fields -->
+                    <!-- Key Highlights & Best For -->
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <h5 class="mb-4">
+                                <i class="fas fa-star text-primary me-2"></i>Key Highlights
+                            </h5>
+                            
+                            <div id="keyHighlightsContainer">
+                                @php
+                                    $keyHighlights = old('key_highlights', $destination->key_highlights ?? []);
+                                    if(empty($keyHighlights)) $keyHighlights = [''];
+                                @endphp
+                                
+                                @foreach($keyHighlights as $index => $highlight)
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="key_highlights[]" 
+                                               value="{{ $highlight }}" placeholder="e.g., Ancient Kamakhya Temple">
+                                        <button type="button" class="btn btn-outline-danger remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addKeyHighlight">
+                                <i class="fas fa-plus me-1"></i>Add Highlight
+                            </button>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="mb-4">
+                                <i class="fas fa-tags text-primary me-2"></i>Best For Tags
+                            </h5>
+                            
+                            <div id="bestForContainer">
+                                @php
+                                    $bestForTags = old('best_for_tags', $destination->best_for_tags ?? []);
+                                    if(empty($bestForTags)) $bestForTags = [''];
+                                @endphp
+                                
+                                @foreach($bestForTags as $index => $tag)
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="best_for_tags[]" 
+                                               value="{{ $tag }}" placeholder="e.g., Pilgrimage">
+                                        <button type="button" class="btn btn-outline-danger remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addBestFor">
+                                <i class="fas fa-plus me-1"></i>Add Tag
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Basic Array Fields -->
                     <h5 class="mb-4">
-                        <i class="fas fa-list text-primary me-2"></i>Additional Details
+                        <i class="fas fa-list text-primary me-2"></i>Basic Details
                     </h5>
                     
-                    <div class="mb-4">
-                        <label class="form-label">Top Attractions</label>
-                        <div id="attractionsContainer">
-                            @php
-                                $attractions = old('attractions', $destination->attractions ?? []);
-                                if(empty($attractions)) $attractions = [''];
-                            @endphp
-                            
-                            @foreach($attractions as $index => $attraction)
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control" 
-                                           name="attractions[]" value="{{ $attraction }}"
-                                           placeholder="Enter attraction name">
-                                    <button type="button" class="btn btn-outline-danger remove-field">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            @endforeach
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label">Top Attractions (Simple)</label>
+                            <div id="attractionsContainer">
+                                @php
+                                    $attractions = old('attractions', $destination->attractions ?? []);
+                                    if(empty($attractions)) $attractions = [''];
+                                @endphp
+                                
+                                @foreach($attractions as $index => $attraction)
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="attractions[]" 
+                                               value="{{ $attraction }}" placeholder="Enter attraction name">
+                                        <button type="button" class="btn btn-outline-danger remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addAttraction">
+                                <i class="fas fa-plus me-1"></i>Add Another
+                            </button>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addAttraction">
-                            <i class="fas fa-plus me-1"></i>Add Another Attraction
-                        </button>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label">Nearby Areas (Simple)</label>
+                            <div id="areasContainer">
+                                @php
+                                    $areas = old('nearby_areas', $destination->nearby_areas ?? []);
+                                    if(empty($areas)) $areas = [''];
+                                @endphp
+                                
+                                @foreach($areas as $index => $area)
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="nearby_areas[]" 
+                                               value="{{ $area }}" placeholder="Enter nearby area name">
+                                        <button type="button" class="btn btn-outline-danger remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addArea">
+                                <i class="fas fa-plus me-1"></i>Add Another
+                            </button>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label">Travel Tips (Simple)</label>
+                            <div id="tipsContainer">
+                                @php
+                                    $tips = old('travel_tips', $destination->travel_tips ?? []);
+                                    if(empty($tips)) $tips = [''];
+                                @endphp
+                                
+                                @foreach($tips as $index => $tip)
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control" name="travel_tips[]" 
+                                               value="{{ $tip }}" placeholder="Enter travel tip">
+                                        <button type="button" class="btn btn-outline-danger remove-field">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addTip">
+                                <i class="fas fa-plus me-1"></i>Add Another
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="form-label">Nearby Areas</label>
-                        <div id="areasContainer">
-                            @php
-                                $areas = old('nearby_areas', $destination->nearby_areas ?? []);
-                                if(empty($areas)) $areas = [''];
-                            @endphp
-                            
-                            @foreach($areas as $index => $area)
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control" 
-                                           name="nearby_areas[]" value="{{ $area }}"
-                                           placeholder="Enter nearby area name">
-                                    <button type="button" class="btn btn-outline-danger remove-field">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addArea">
-                            <i class="fas fa-plus me-1"></i>Add Another Area
-                        </button>
-                    </div>
+                    <!-- =============================================== -->
+                    <!-- DETAILED ATTRACTIONS WITH IMAGE UPLOAD -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4 mt-5">
+                        <i class="fas fa-landmark text-primary me-2"></i>Detailed Attractions
+                    </h5>
                     
-                    <div class="mb-4">
-                        <label class="form-label">Travel Tips</label>
-                        <div id="tipsContainer">
-                            @php
-                                $tips = old('travel_tips', $destination->travel_tips ?? []);
-                                if(empty($tips)) $tips = [''];
-                            @endphp
-                            
-                            @foreach($tips as $index => $tip)
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control" 
-                                           name="travel_tips[]" value="{{ $tip }}"
-                                           placeholder="Enter travel tip">
-                                    <button type="button" class="btn btn-outline-danger remove-field">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                    <div id="detailedAttractionsContainer" class="mb-5">
+                        @php
+                            $attractionsDetails = old('attractions_details', $destination->attractions_details ?? []);
+                            if(empty($attractionsDetails)) $attractionsDetails = [
+                                [
+                                    'name' => '',
+                                    'location' => '',
+                                    'rating' => '',
+                                    'description' => '',
+                                    'image' => '',
+                                    'button_text' => 'View Details'
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($attractionsDetails as $index => $attraction)
+                        <div class="card mb-3 attraction-item">
+                            <div class="card-body">
+                                @if(isset($attraction['image']) && $attraction['image'])
+                                    <div class="mb-3">
+                                        <label class="form-label">Current Image</label>
+                                        <div>
+                                            <img src="{{ asset('storage/' . $attraction['image']) }}" 
+                                                 alt="{{ $attraction['name'] }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Attraction Name</label>
+                                        <input type="text" class="form-control" name="attractions_details[{{ $index }}][name]" 
+                                               value="{{ $attraction['name'] }}" placeholder="e.g., Brahmaputra River Cruise">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control" name="attractions_details[{{ $index }}][location]" 
+                                               value="{{ $attraction['location'] }}" placeholder="e.g., Brahmaputra River">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Rating</label>
+                                        <input type="number" step="0.1" class="form-control" 
+                                               name="attractions_details[{{ $index }}][rating]" value="{{ $attraction['rating'] }}" placeholder="4.5" min="0" max="5">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" name="attractions_details[{{ $index }}][description]" 
+                                                  rows="2" placeholder="Short description...">{{ $attraction['description'] }}</textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Attraction Image</label>
+                                        <input type="file" class="form-control attraction-image" 
+                                               name="attractions_details[{{ $index }}][image]" accept="image/*">
+                                        <small class="text-muted">Max: 2MB, Recommended: 600x400px</small>
+                                        
+                                        <!-- Image Preview -->
+                                        <div class="attraction-preview mt-2" style="display: none;">
+                                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Button Text</label>
+                                        <input type="text" class="form-control" name="attractions_details[{{ $index }}][button_text]" 
+                                               value="{{ $attraction['button_text'] ?? 'View Details' }}" placeholder="Button text">
+                                    </div>
                                 </div>
-                            @endforeach
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-detailed-attraction">
+                                    <i class="fas fa-trash me-1"></i>Remove Attraction
+                                </button>
+                            </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addTip">
-                            <i class="fas fa-plus me-1"></i>Add Another Tip
-                        </button>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addDetailedAttraction">
+                        <i class="fas fa-plus me-1"></i>Add Detailed Attraction
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- POPULAR PLACES -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-map-pin text-primary me-2"></i>Other Popular Places
+                    </h5>
+                    
+                    <div id="popularPlacesContainer" class="mb-5">
+                        @php
+                            $popularPlaces = old('popular_places', $destination->popular_places ?? []);
+                            if(empty($popularPlaces)) $popularPlaces = [
+                                [
+                                    'icon' => 'fas fa-monument',
+                                    'name' => '',
+                                    'description' => ''
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($popularPlaces as $index => $place)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Icon Class</label>
+                                        <input type="text" class="form-control" name="popular_places[{{ $index }}][icon]" 
+                                               value="{{ $place['icon'] ?? 'fas fa-monument' }}" placeholder="e.g., fas fa-monument">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label class="form-label">Place Name</label>
+                                        <input type="text" class="form-control" name="popular_places[{{ $index }}][name]" 
+                                               value="{{ $place['name'] }}" placeholder="e.g., Navagraha Temple">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" name="popular_places[{{ $index }}][description]" 
+                                                  rows="2" placeholder="e.g., Ancient temple complex">{{ $place['description'] }}</textarea>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-popular-place">
+                                    <i class="fas fa-trash me-1"></i>Remove Place
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addPopularPlace">
+                        <i class="fas fa-plus me-1"></i>Add Popular Place
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- HOTELS DATA WITH IMAGE UPLOAD -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-hotel text-primary me-2"></i>Hotels & Stays
+                    </h5>
+                    
+                    <div id="hotelsContainer" class="mb-5">
+                        @php
+                            $hotelsData = old('hotels_data', $destination->hotels_data ?? []);
+                            if(empty($hotelsData)) $hotelsData = [
+                                [
+                                    'name' => '',
+                                    'location' => '',
+                                    'price' => '',
+                                    'rating' => '',
+                                    'recommendation' => '',
+                                    'features' => '',
+                                    'image' => '',
+                                    'button_text' => 'View Details'
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($hotelsData as $index => $hotel)
+                        <div class="card mb-3 hotel-item">
+                            <div class="card-body">
+                                @if(isset($hotel['image']) && $hotel['image'])
+                                    <div class="mb-3">
+                                        <label class="form-label">Current Image</label>
+                                        <div>
+                                            <img src="{{ asset('storage/' . $hotel['image']) }}" 
+                                                 alt="{{ $hotel['name'] }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Hotel Name</label>
+                                        <input type="text" class="form-control" name="hotels_data[{{ $index }}][name]" 
+                                               value="{{ $hotel['name'] }}" placeholder="e.g., Radisson Blu Guwahati">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control" name="hotels_data[{{ $index }}][location]" 
+                                               value="{{ $hotel['location'] }}" placeholder="e.g., GS Road, Guwahati">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Price (₹)</label>
+                                        <input type="number" class="form-control" name="hotels_data[{{ $index }}][price]" 
+                                               value="{{ $hotel['price'] }}" placeholder="6168" min="0">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Rating</label>
+                                        <input type="number" step="0.1" class="form-control" 
+                                               name="hotels_data[{{ $index }}][rating]" value="{{ $hotel['rating'] }}" placeholder="4.5" min="0" max="5">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Recommendation %</label>
+                                        <input type="number" class="form-control" name="hotels_data[{{ $index }}][recommendation]" 
+                                               value="{{ $hotel['recommendation'] }}" placeholder="94" min="0" max="100">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Features (Comma separated)</label>
+                                        <input type="text" class="form-control" 
+                                               name="hotels_data[{{ $index }}][features]" 
+                                               value="{{ is_array($hotel['features']) ? implode(', ', $hotel['features']) : $hotel['features'] }}"
+                                               placeholder="Free WiFi, Pool, Spa, Restaurant">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Hotel Image</label>
+                                        <input type="file" class="form-control hotel-image" 
+                                               name="hotels_data[{{ $index }}][image]" accept="image/*">
+                                        <small class="text-muted">Max: 2MB, Recommended: 800x600px</small>
+                                        
+                                        <!-- Image Preview -->
+                                        <div class="hotel-preview mt-2" style="display: none;">
+                                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Button Text</label>
+                                        <input type="text" class="form-control" name="hotels_data[{{ $index }}][button_text]" 
+                                               value="{{ $hotel['button_text'] ?? 'View Details' }}" placeholder="Button text">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-hotel">
+                                    <i class="fas fa-trash me-1"></i>Remove Hotel
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addHotel">
+                        <i class="fas fa-plus me-1"></i>Add Hotel
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- NEARBY AREAS DETAILED WITH IMAGE UPLOAD -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-map-marked-alt text-primary me-2"></i>Nearby Areas (Detailed)
+                    </h5>
+                    
+                    <div id="nearbyAreasContainer" class="mb-5">
+                        @php
+                            $nearbyAreasDetailed = old('nearby_areas_detailed', $destination->nearby_areas_detailed ?? []);
+                            if(empty($nearbyAreasDetailed)) $nearbyAreasDetailed = [
+                                [
+                                    'name' => '',
+                                    'distance' => '',
+                                    'description' => '',
+                                    'image' => '',
+                                    'drive_time' => '',
+                                    'button_text' => 'Explore'
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($nearbyAreasDetailed as $index => $area)
+                        <div class="card mb-3 area-item">
+                            <div class="card-body">
+                                @if(isset($area['image']) && $area['image'])
+                                    <div class="mb-3">
+                                        <label class="form-label">Current Image</label>
+                                        <div>
+                                            <img src="{{ asset('storage/' . $area['image']) }}" 
+                                                 alt="{{ $area['name'] }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Area Name</label>
+                                        <input type="text" class="form-control" name="nearby_areas_detailed[{{ $index }}][name]" 
+                                               value="{{ $area['name'] }}" placeholder="e.g., Shillong, Meghalaya">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Distance</label>
+                                        <input type="text" class="form-control" name="nearby_areas_detailed[{{ $index }}][distance]" 
+                                               value="{{ $area['distance'] }}" placeholder="e.g., 12 km from Guwahati">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" name="nearby_areas_detailed[{{ $index }}][description]" 
+                                                  rows="3" placeholder="e.g., Scotland of the East with beautiful hills">{{ $area['description'] }}</textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Area Image</label>
+                                        <input type="file" class="form-control area-image" 
+                                               name="nearby_areas_detailed[{{ $index }}][image]" accept="image/*">
+                                        <small class="text-muted">Max: 2MB, Recommended: 600x400px</small>
+                                        
+                                        <!-- Image Preview -->
+                                        <div class="area-preview mt-2" style="display: none;">
+                                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Drive Time</label>
+                                        <input type="text" class="form-control" name="nearby_areas_detailed[{{ $index }}][drive_time]" 
+                                               value="{{ $area['drive_time'] }}" placeholder="e.g., 3h drive">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Button Text</label>
+                                        <input type="text" class="form-control" name="nearby_areas_detailed[{{ $index }}][button_text]" 
+                                               value="{{ $area['button_text'] ?? 'Explore' }}" placeholder="Button text">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-area">
+                                    <i class="fas fa-trash me-1"></i>Remove Area
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addNearbyArea">
+                        <i class="fas fa-plus me-1"></i>Add Nearby Area
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- MORE NEARBY DESTINATIONS -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-location-dot text-primary me-2"></i>More Nearby Destinations
+                    </h5>
+                    
+                    <div id="moreDestinationsContainer" class="mb-5">
+                        @php
+                            $moreDestinations = old('more_nearby_destinations', $destination->more_nearby_destinations ?? []);
+                            if(empty($moreDestinations)) $moreDestinations = [
+                                [
+                                    'icon' => 'fas fa-mountain',
+                                    'name' => '',
+                                    'distance' => '',
+                                    'category' => ''
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($moreDestinations as $index => $dest)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Icon Class</label>
+                                        <input type="text" class="form-control" name="more_nearby_destinations[{{ $index }}][icon]" 
+                                               value="{{ $dest['icon'] ?? 'fas fa-mountain' }}" placeholder="e.g., fas fa-mountain">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label class="form-label">Destination Name</label>
+                                        <input type="text" class="form-control" name="more_nearby_destinations[{{ $index }}][name]" 
+                                               value="{{ $dest['name'] }}" placeholder="e.g., Haflong Hills">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Distance</label>
+                                        <input type="text" class="form-control" name="more_nearby_destinations[{{ $index }}][distance]" 
+                                               value="{{ $dest['distance'] }}" placeholder="e.g., 114 km">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Category</label>
+                                        <input type="text" class="form-control" name="more_nearby_destinations[{{ $index }}][category]" 
+                                               value="{{ $dest['category'] }}" placeholder="e.g., Hill station">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-more-destination">
+                                    <i class="fas fa-trash me-1"></i>Remove Destination
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addMoreDestination">
+                        <i class="fas fa-plus me-1"></i>Add More Destination
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- PHOTO GALLERY WITH IMAGE UPLOAD -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-images text-primary me-2"></i>Photo Gallery
+                    </h5>
+                    
+                    <div id="galleryContainer" class="mb-5">
+                        @php
+                            $galleryImages = collect($destination->gallery_images ?? []);
+                            $existingImages = $galleryImages->pluck('url')->toArray();
+                            $existingAltTexts = $galleryImages->pluck('alt')->toArray();
+                            
+                            if(empty($existingImages)) {
+                                $existingImages = [''];
+                                $existingAltTexts = [''];
+                            }
+                        @endphp
+                        
+                        @foreach($existingImages as $index => $image)
+                        <div class="row g-3 mb-3 gallery-row">
+                            @if($image && Storage::exists(str_replace('storage/', '', $image)))
+                                <div class="col-12 mb-2">
+                                    <label class="form-label">Current Image</label>
+                                    <div>
+                                        <img src="{{ asset('storage/' . str_replace('storage/', '', $image)) }}" 
+                                             alt="{{ $existingAltTexts[$index] ?? '' }}" 
+                                             class="img-thumbnail" 
+                                             style="max-height: 100px;">
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            <div class="col-md-8">
+                                <label class="form-label">Gallery Image</label>
+                                <input type="file" class="form-control gallery-image" 
+                                       name="gallery_images[]" accept="image/*">
+                                <small class="text-muted">Max: 2MB, Recommended: 800x600px</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Alt Text</label>
+                                <input type="text" class="form-control" name="gallery_alt_text[]" 
+                                       value="{{ $existingAltTexts[$index] ?? '' }}" placeholder="Description of image">
+                                
+                                <!-- Image Preview -->
+                                <div class="gallery-preview mt-2" style="display: none;">
+                                    <img src="" alt="Preview" class="img-thumbnail" style="max-height: 80px;">
+                                </div>
+                                
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-gallery-image">
+                                    <i class="fas fa-trash me-1"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addGalleryImage">
+                        <i class="fas fa-plus me-1"></i>Add Gallery Image
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- TRAVEL TIPS & FAQ -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-lightbulb text-primary me-2"></i>Travel Tips & FAQ
+                    </h5>
+                    
+                    <div id="travelTipsContainer" class="mb-5">
+                        @php
+                            $travelTips = old('travel_tips_faq', $destination->travel_tips_faq ?? []);
+                            if(empty($travelTips)) $travelTips = [
+                                [
+                                    'icon' => 'fas fa-suitcase',
+                                    'title' => '',
+                                    'content' => ''
+                                ]
+                            ];
+                        @endphp
+                        
+                        @foreach($travelTips as $index => $tip)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Icon Class</label>
+                                        <input type="text" class="form-control" name="travel_tips_faq[{{ $index }}][icon]" 
+                                               value="{{ $tip['icon'] ?? 'fas fa-suitcase' }}" placeholder="e.g., fas fa-suitcase">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" class="form-control" name="travel_tips_faq[{{ $index }}][title]" 
+                                               value="{{ $tip['title'] }}" placeholder="e.g., Best Time to Visit">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Content</label>
+                                        <textarea class="form-control" name="travel_tips_faq[{{ $index }}][content]" 
+                                                  rows="4" placeholder="Detailed information...">{{ $tip['content'] }}</textarea>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-travel-tip">
+                                    <i class="fas fa-trash me-1"></i>Remove Travel Tip
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="btn btn-outline-primary mb-5" id="addTravelTip">
+                        <i class="fas fa-plus me-1"></i>Add Travel Tip
+                    </button>
+                    
+                    <!-- =============================================== -->
+                    <!-- QUICK FACTS -->
+                    <!-- =============================================== -->
+                    <h5 class="mb-4">
+                        <i class="fas fa-clipboard-list text-primary me-2"></i>Quick Facts
+                    </h5>
+                    
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label">Language</label>
+                            <input type="text" class="form-control" name="quick_facts[language]" 
+                                   value="{{ old('quick_facts.language', $destination->quick_facts['language'] ?? 'Assamese, Hindi, English') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Time Zone</label>
+                            <input type="text" class="form-control" name="quick_facts[time_zone]" 
+                                   value="{{ old('quick_facts.time_zone', $destination->quick_facts['time_zone'] ?? 'IST (UTC+5:30)') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Currency</label>
+                            <input type="text" class="form-control" name="quick_facts[currency]" 
+                                   value="{{ old('quick_facts.currency', $destination->quick_facts['currency'] ?? 'Indian Rupee (₹)') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Emergency Numbers</label>
+                            <input type="text" class="form-control" name="quick_facts[emergency]" 
+                                   value="{{ old('quick_facts.emergency', $destination->quick_facts['emergency'] ?? '112, 108') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Voltage</label>
+                            <input type="text" class="form-control" name="quick_facts[voltage]" 
+                                   value="{{ old('quick_facts.voltage', $destination->quick_facts['voltage'] ?? '230V, 50Hz') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Climate</label>
+                            <input type="text" class="form-control" name="quick_facts[climate]" 
+                                   value="{{ old('quick_facts.climate', $destination->quick_facts['climate'] ?? 'Tropical Monsoon') }}">
+                        </div>
                     </div>
                     
                     <!-- Status -->
@@ -322,7 +962,7 @@
                     </div>
                     
                     <!-- Submit Button -->
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between mt-5 pt-4 border-top">
                         <a href="{{ route('admin.destinations.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Cancel
                         </a>
@@ -331,115 +971,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4">
-        <!-- Preview Card -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-eye me-2"></i>Preview
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="text-center mb-3">
-                    <div id="livePreviewImage" class="bg-light rounded d-flex align-items-center justify-content-center" 
-                         style="height: 200px;">
-                        @if($destination->image)
-                            <img src="{{ asset('storage/' . $destination->image) }}" 
-                                 alt="{{ $destination->name }}" 
-                                 class="img-fluid rounded" 
-                                 style="max-height: 200px;">
-                        @else
-                            <i class="fas fa-image fa-3x text-muted"></i>
-                        @endif
-                    </div>
-                </div>
-                <h5 id="livePreviewName" class="text-center">{{ $destination->name }}</h5>
-                <div class="text-center text-muted mb-3">
-                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
-                    <span id="livePreviewLocation">{{ $destination->location }}, {{ $destination->state }}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Price:</span>
-                    <span class="fw-bold text-primary">₹<span id="livePreviewPrice">{{ number_format($destination->price) }}</span></span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Category:</span>
-                    <span id="livePreviewCategory">{{ $destination->category }}</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Type:</span>
-                    <span id="livePreviewType">{{ $destination->type ?? '-' }}</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span>Rating:</span>
-                    <span class="text-warning" id="livePreviewRating">
-                        <i class="fas fa-star"></i> {{ $destination->rating ?? '-' }}
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Destination Info Card -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle me-2"></i>Destination Info
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted">Created</small>
-                    <p class="mb-0">{{ $destination->created_at->format('d M Y, h:i A') }}</p>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted">Last Updated</small>
-                    <p class="mb-0">{{ $destination->updated_at->format('d M Y, h:i A') }}</p>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted">Slug</small>
-                    <p class="mb-0">
-                        <code>{{ $destination->slug }}</code>
-                    </p>
-                </div>
-                <div>
-                    <small class="text-muted">URL</small>
-                    <p class="mb-0">
-                        <a href="{{ route('destination.show', $destination->slug) }}" target="_blank" class="text-decoration-none">
-                            {{ route('destination.show', $destination->slug) }}
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Help Card -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h6 class="mb-3">
-                    <i class="fas fa-question-circle text-primary me-2"></i>Tips
-                </h6>
-                <ul class="list-unstyled text-muted small">
-                    <li class="mb-2">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        Update image only if needed
-                    </li>
-                    <li class="mb-2">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        Use descriptive attractions for better SEO
-                    </li>
-                    <li class="mb-2">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        Keep description concise but informative
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        Set to "Draft" if not ready for publication
-                    </li>
-                </ul>
             </div>
         </div>
     </div>
@@ -480,7 +1011,7 @@
         console.log('Summernote editors initialized successfully!');
     });
 
-    // Image Preview
+    // Main Image Preview
     document.getElementById('image').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -488,90 +1019,614 @@
             reader.onload = function(e) {
                 const previewDiv = document.getElementById('imagePreview');
                 const previewImg = document.getElementById('previewImage');
-                const livePreview = document.getElementById('livePreviewImage');
                 
                 previewImg.src = e.target.result;
                 previewDiv.style.display = 'block';
-                
-                // Update live preview
-                livePreview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 200px;">`;
             }
             reader.readAsDataURL(file);
         }
     });
     
-    // Live Preview Updates
-    document.getElementById('name').addEventListener('input', function() {
-        document.getElementById('livePreviewName').textContent = this.value || '{{ $destination->name }}';
+    // Hero Image Preview
+    document.getElementById('hero_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewDiv = document.getElementById('heroImagePreview');
+                const previewImg = document.getElementById('previewHeroImage');
+                
+                previewImg.src = e.target.result;
+                previewDiv.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
     });
     
-    document.getElementById('location').addEventListener('input', function() {
-        const state = document.getElementById('state').value || '{{ $destination->state }}';
-        document.getElementById('livePreviewLocation').textContent = 
-            `${this.value || '{{ $destination->location }}'}, ${state}`;
-    });
+    // ================================================================
+    // IMAGE PREVIEW FUNCTIONS
+    // ================================================================
+
+    // Function to handle image preview for dynamically added items
+    function setupImagePreview(inputSelector, previewSelector) {
+        document.addEventListener('change', function(e) {
+            if (e.target.matches(inputSelector)) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewDiv = e.target.closest('.col-md-6, .col-md-8').querySelector(previewSelector);
+                        const previewImg = previewDiv.querySelector('img');
+                        
+                        previewImg.src = e.target.result;
+                        previewDiv.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    }
+
+    // Setup previews for different image types
+    setupImagePreview('.attraction-image', '.attraction-preview');
+    setupImagePreview('.hotel-image', '.hotel-preview');
+    setupImagePreview('.area-image', '.area-preview');
+    setupImagePreview('.gallery-image', '.gallery-preview');
+
+    // ================================================================
+    // DYNAMIC FORM FIELD FUNCTIONS
+    // ================================================================
     
-    document.getElementById('state').addEventListener('change', function() {
-        const location = document.getElementById('location').value || '{{ $destination->location }}';
-        document.getElementById('livePreviewLocation').textContent = 
-            `${location}, ${this.value || '{{ $destination->state }}'}`;
-    });
-    
-    document.getElementById('price').addEventListener('input', function() {
-        const price = this.value ? parseInt(this.value).toLocaleString() : '{{ number_format($destination->price) }}';
-        document.getElementById('livePreviewPrice').textContent = price;
-    });
-    
-    document.getElementById('category').addEventListener('change', function() {
-        document.getElementById('livePreviewCategory').textContent = this.value || '{{ $destination->category }}';
-    });
-    
-    document.getElementById('type').addEventListener('change', function() {
-        document.getElementById('livePreviewType').textContent = this.value || '{{ $destination->type ?? "-" }}';
-    });
-    
-    document.getElementById('rating').addEventListener('input', function() {
-        const rating = this.value || '{{ $destination->rating ?? "-" }}';
-        document.getElementById('livePreviewRating').innerHTML = 
-            `<i class="fas fa-star"></i> ${rating}`;
-    });
-    
-    // Dynamic Form Fields
-    function addField(containerId, fieldName, placeholder) {
-        const container = document.getElementById(containerId);
+    let attractionCounter = {{ count($destination->attractions_details ?? []) }};
+    let popularPlaceCounter = {{ count($destination->popular_places ?? []) }};
+    let hotelCounter = {{ count($destination->hotels_data ?? []) }};
+    let areaCounter = {{ count($destination->nearby_areas_detailed ?? []) }};
+    let destinationCounter = {{ count($destination->more_nearby_destinations ?? []) }};
+    let travelTipCounter = {{ count($destination->travel_tips_faq ?? []) }};
+    let galleryCounter = {{ count($destination->gallery_images ?? []) }};
+
+    // Key Highlights
+    document.getElementById('addKeyHighlight').addEventListener('click', function() {
+        const container = document.getElementById('keyHighlightsContainer');
         const div = document.createElement('div');
         div.className = 'input-group mb-2';
         div.innerHTML = `
-            <input type="text" class="form-control" name="${fieldName}[]" placeholder="${placeholder}">
+            <input type="text" class="form-control" name="key_highlights[]" 
+                   placeholder="e.g., Ancient Kamakhya Temple">
             <button type="button" class="btn btn-outline-danger remove-field">
                 <i class="fas fa-times"></i>
             </button>
         `;
         container.appendChild(div);
-        
-        // Add remove event
         div.querySelector('.remove-field').addEventListener('click', function() {
             div.remove();
         });
-    }
-    
-    // Add event listeners for dynamic fields
+    });
+
+    // Best For Tags
+    document.getElementById('addBestFor').addEventListener('click', function() {
+        const container = document.getElementById('bestForContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        div.innerHTML = `
+            <input type="text" class="form-control" name="best_for_tags[]" 
+                   placeholder="e.g., Pilgrimage">
+            <button type="button" class="btn btn-outline-danger remove-field">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(div);
+        div.querySelector('.remove-field').addEventListener('click', function() {
+            div.remove();
+        });
+    });
+
+    // Basic Attractions
     document.getElementById('addAttraction').addEventListener('click', function() {
-        addField('attractionsContainer', 'attractions', 'Enter attraction name');
+        const container = document.getElementById('attractionsContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        div.innerHTML = `
+            <input type="text" class="form-control" name="attractions[]" 
+                   placeholder="Enter attraction name">
+            <button type="button" class="btn btn-outline-danger remove-field">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(div);
+        div.querySelector('.remove-field').addEventListener('click', function() {
+            div.remove();
+        });
     });
-    
+
+    // Basic Areas
     document.getElementById('addArea').addEventListener('click', function() {
-        addField('areasContainer', 'nearby_areas', 'Enter nearby area name');
+        const container = document.getElementById('areasContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        div.innerHTML = `
+            <input type="text" class="form-control" name="nearby_areas[]" 
+                   placeholder="Enter nearby area name">
+            <button type="button" class="btn btn-outline-danger remove-field">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(div);
+        div.querySelector('.remove-field').addEventListener('click', function() {
+            div.remove();
+        });
     });
-    
+
+    // Basic Tips
     document.getElementById('addTip').addEventListener('click', function() {
-        addField('tipsContainer', 'travel_tips', 'Enter travel tip');
+        const container = document.getElementById('tipsContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2';
+        div.innerHTML = `
+            <input type="text" class="form-control" name="travel_tips[]" 
+                   placeholder="Enter travel tip">
+            <button type="button" class="btn btn-outline-danger remove-field">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(div);
+        div.querySelector('.remove-field').addEventListener('click', function() {
+            div.remove();
+        });
     });
-    
+
+    // Detailed Attractions
+    document.getElementById('addDetailedAttraction').addEventListener('click', function() {
+        const container = document.getElementById('detailedAttractionsContainer');
+        const index = attractionCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3 attraction-item';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Attraction Name</label>
+                        <input type="text" class="form-control" 
+                               name="attractions_details[${index}][name]" 
+                               placeholder="e.g., Brahmaputra River Cruise">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" 
+                               name="attractions_details[${index}][location]" 
+                               placeholder="e.g., Brahmaputra River">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rating</label>
+                        <input type="number" step="0.1" class="form-control" 
+                               name="attractions_details[${index}][rating]" 
+                               placeholder="4.5" min="0" max="5">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" 
+                                  name="attractions_details[${index}][description]" 
+                                  rows="2" placeholder="Short description..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Attraction Image</label>
+                        <input type="file" class="form-control attraction-image" 
+                               name="attractions_details[${index}][image]" accept="image/*">
+                        <small class="text-muted">Max: 2MB, Recommended: 600x400px</small>
+                        
+                        <!-- Image Preview -->
+                        <div class="attraction-preview mt-2" style="display: none;">
+                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Button Text</label>
+                        <input type="text" class="form-control" 
+                               name="attractions_details[${index}][button_text]" 
+                               value="View Details" placeholder="Button text">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-detailed-attraction">
+                    <i class="fas fa-trash me-1"></i>Remove Attraction
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        // Setup image preview for new attraction
+        const attractionInput = card.querySelector('.attraction-image');
+        attractionInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = card.querySelector('.attraction-preview');
+                    const previewImg = previewDiv.querySelector('img');
+                    
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        card.querySelector('.remove-detailed-attraction').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
+    // Popular Places
+    document.getElementById('addPopularPlace').addEventListener('click', function() {
+        const container = document.getElementById('popularPlacesContainer');
+        const index = popularPlaceCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Icon Class</label>
+                        <input type="text" class="form-control" 
+                               name="popular_places[${index}][icon]" 
+                               value="fas fa-monument" placeholder="e.g., fas fa-monument">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Place Name</label>
+                        <input type="text" class="form-control" 
+                               name="popular_places[${index}][name]" 
+                               placeholder="e.g., Navagraha Temple">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" 
+                                  name="popular_places[${index}][description]" 
+                                  rows="2" placeholder="e.g., Ancient temple complex"></textarea>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-popular-place">
+                    <i class="fas fa-trash me-1"></i>Remove Place
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        card.querySelector('.remove-popular-place').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
+    // Hotels
+    document.getElementById('addHotel').addEventListener('click', function() {
+        const container = document.getElementById('hotelsContainer');
+        const index = hotelCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3 hotel-item';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Hotel Name</label>
+                        <input type="text" class="form-control" 
+                               name="hotels_data[${index}][name]" 
+                               placeholder="e.g., Radisson Blu Guwahati">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" 
+                               name="hotels_data[${index}][location]" 
+                               placeholder="e.g., GS Road, Guwahati">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" class="form-control" 
+                               name="hotels_data[${index}][price]" 
+                               placeholder="6168" min="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rating</label>
+                        <input type="number" step="0.1" class="form-control" 
+                               name="hotels_data[${index}][rating]" 
+                               placeholder="4.5" min="0" max="5">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Recommendation %</label>
+                        <input type="number" class="form-control" 
+                               name="hotels_data[${index}][recommendation]" 
+                               placeholder="94" min="0" max="100">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Features (Comma separated)</label>
+                        <input type="text" class="form-control" 
+                               name="hotels_data[${index}][features]" 
+                               placeholder="Free WiFi, Pool, Spa, Restaurant">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Hotel Image</label>
+                        <input type="file" class="form-control hotel-image" 
+                               name="hotels_data[${index}][image]" accept="image/*">
+                        <small class="text-muted">Max: 2MB, Recommended: 800x600px</small>
+                        
+                        <!-- Image Preview -->
+                        <div class="hotel-preview mt-2" style="display: none;">
+                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Button Text</label>
+                        <input type="text" class="form-control" 
+                               name="hotels_data[${index}][button_text]" 
+                               value="View Details" placeholder="Button text">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-hotel">
+                    <i class="fas fa-trash me-1"></i>Remove Hotel
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        // Setup image preview for new hotel
+        const hotelInput = card.querySelector('.hotel-image');
+        hotelInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = card.querySelector('.hotel-preview');
+                    const previewImg = previewDiv.querySelector('img');
+                    
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        card.querySelector('.remove-hotel').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
+    // Nearby Areas
+    document.getElementById('addNearbyArea').addEventListener('click', function() {
+        const container = document.getElementById('nearbyAreasContainer');
+        const index = areaCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3 area-item';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Area Name</label>
+                        <input type="text" class="form-control" 
+                               name="nearby_areas_detailed[${index}][name]" 
+                               placeholder="e.g., Shillong, Meghalaya">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Distance</label>
+                        <input type="text" class="form-control" 
+                               name="nearby_areas_detailed[${index}][distance]" 
+                               placeholder="e.g., 12 km from Guwahati">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" 
+                                  name="nearby_areas_detailed[${index}][description]" 
+                                  rows="3" placeholder="e.g., Scotland of the East with beautiful hills"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Area Image</label>
+                        <input type="file" class="form-control area-image" 
+                               name="nearby_areas_detailed[${index}][image]" accept="image/*">
+                        <small class="text-muted">Max: 2MB, Recommended: 600x400px</small>
+                        
+                        <!-- Image Preview -->
+                        <div class="area-preview mt-2" style="display: none;">
+                            <img src="" alt="Preview" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Drive Time</label>
+                        <input type="text" class="form-control" 
+                               name="nearby_areas_detailed[${index}][drive_time]" 
+                               placeholder="e.g., 3h drive">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Button Text</label>
+                        <input type="text" class="form-control" 
+                               name="nearby_areas_detailed[${index}][button_text]" 
+                               value="Explore" placeholder="Button text">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-area">
+                    <i class="fas fa-trash me-1"></i>Remove Area
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        // Setup image preview for new area
+        const areaInput = card.querySelector('.area-image');
+        areaInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = card.querySelector('.area-preview');
+                    const previewImg = previewDiv.querySelector('img');
+                    
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        card.querySelector('.remove-area').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
+    // More Nearby Destinations
+    document.getElementById('addMoreDestination').addEventListener('click', function() {
+        const container = document.getElementById('moreDestinationsContainer');
+        const index = destinationCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Icon Class</label>
+                        <input type="text" class="form-control" 
+                               name="more_nearby_destinations[${index}][icon]" 
+                               value="fas fa-mountain" placeholder="e.g., fas fa-mountain">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Destination Name</label>
+                        <input type="text" class="form-control" 
+                               name="more_nearby_destinations[${index}][name]" 
+                               placeholder="e.g., Haflong Hills">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Distance</label>
+                        <input type="text" class="form-control" 
+                               name="more_nearby_destinations[${index}][distance]" 
+                               placeholder="e.g., 114 km">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" 
+                               name="more_nearby_destinations[${index}][category]" 
+                               placeholder="e.g., Hill station">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-more-destination">
+                    <i class="fas fa-trash me-1"></i>Remove Destination
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        card.querySelector('.remove-more-destination').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
+    // Photo Gallery
+    document.getElementById('addGalleryImage').addEventListener('click', function() {
+        const container = document.getElementById('galleryContainer');
+        const index = galleryCounter++;
+        
+        const row = document.createElement('div');
+        row.className = 'row g-3 mb-3 gallery-row';
+        row.innerHTML = `
+            <div class="col-md-8">
+                <label class="form-label">Gallery Image</label>
+                <input type="file" class="form-control gallery-image" 
+                       name="gallery_images[]" accept="image/*">
+                <small class="text-muted">Max: 2MB, Recommended: 800x600px</small>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Alt Text</label>
+                <input type="text" class="form-control" 
+                       name="gallery_alt_text[]" 
+                       placeholder="Description of image">
+                
+                <!-- Image Preview -->
+                <div class="gallery-preview mt-2" style="display: none;">
+                    <img src="" alt="Preview" class="img-thumbnail" style="max-height: 80px;">
+                </div>
+                
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-gallery-image">
+                    <i class="fas fa-trash me-1"></i>Remove
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+        
+        // Setup image preview for new gallery image
+        const galleryInput = row.querySelector('.gallery-image');
+        galleryInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = row.querySelector('.gallery-preview');
+                    const previewImg = previewDiv.querySelector('img');
+                    
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        row.querySelector('.remove-gallery-image').addEventListener('click', function() {
+            row.remove();
+        });
+    });
+
+    // Travel Tips
+    document.getElementById('addTravelTip').addEventListener('click', function() {
+        const container = document.getElementById('travelTipsContainer');
+        const index = travelTipCounter++;
+        
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Icon Class</label>
+                        <input type="text" class="form-control" 
+                               name="travel_tips_faq[${index}][icon]" 
+                               value="fas fa-suitcase" placeholder="e.g., fas fa-suitcase">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" 
+                               name="travel_tips_faq[${index}][title]" 
+                               placeholder="e.g., Best Time to Visit">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-control" 
+                                  name="travel_tips_faq[${index}][content]" 
+                                  rows="4" placeholder="Detailed information..."></textarea>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3 remove-travel-tip">
+                    <i class="fas fa-trash me-1"></i>Remove Travel Tip
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+        
+        card.querySelector('.remove-travel-tip').addEventListener('click', function() {
+            card.remove();
+        });
+    });
+
     // Remove existing fields
     document.querySelectorAll('.remove-field').forEach(button => {
         button.addEventListener('click', function() {
             this.closest('.input-group').remove();
+        });
+    });
+
+    // Remove dynamic sections
+    document.querySelectorAll('.remove-detailed-attraction, .remove-popular-place, .remove-hotel, .remove-area, .remove-more-destination, .remove-gallery-image, .remove-travel-tip').forEach(button => {
+        button.addEventListener('click', function() {
+            const item = this.closest('.card, .gallery-row');
+            if (item) {
+                item.remove();
+            }
         });
     });
 </script>

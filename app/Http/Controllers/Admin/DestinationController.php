@@ -7,7 +7,6 @@ use App\Models\Destination;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-// use Purifier; // Agar package install kiya hai toh
 
 class DestinationController extends Controller
 {
@@ -55,11 +54,11 @@ class DestinationController extends Controller
             'price' => 'required|integer|min:0',
             'rating' => 'nullable|numeric|min:0|max:5',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            
-            // ✅ 'string' validation HATA DEIN - HTML allow karein
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'hero_title' => 'nullable|string|max:255',
+            'hero_subtitle' => 'nullable|string|max:255',
             'description' => 'required',
             'overview' => 'nullable',
-            
             'hotels_count' => 'nullable|integer|min:0',
             'best_time' => 'nullable|string|max:100',
             'ideal_duration' => 'nullable|string|max:50',
@@ -70,30 +69,54 @@ class DestinationController extends Controller
         // Generate slug
         $validated['slug'] = Str::slug($request->name);
 
-        // Handle image upload
+        // Handle main image upload
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('destinations', 'public');
             $validated['image'] = $imagePath;
         }
 
-        // ✅ Handle HTML content (SAFELY)
-        // Option 1: Basic strip_tags (Simple)
+        // Handle hero image upload
+        if ($request->hasFile('hero_image')) {
+            $heroImagePath = $request->file('hero_image')->store('destinations/hero', 'public');
+            $validated['hero_image'] = $heroImagePath;
+        }
+
+        // Handle HTML content (SAFELY)
         $validated['description'] = strip_tags($request->description, 
             '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><span><div>');
         
         $validated['overview'] = strip_tags($request->overview,
             '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><img><table><tr><td><th><div><span>');
 
-        /*
-        // Option 2: Agar Purifier install kiya hai
-        // $validated['description'] = Purifier::clean($request->description);
-        // $validated['overview'] = Purifier::clean($request->overview);
-        */
-
-        // Handle JSON fields
+        // Handle basic JSON fields
         $validated['attractions'] = $this->processArrayInput($request->input('attractions', []));
         $validated['nearby_areas'] = $this->processArrayInput($request->input('nearby_areas', []));
         $validated['travel_tips'] = $this->processArrayInput($request->input('travel_tips', []));
+
+        // Process new dynamic fields
+        $validated['key_highlights'] = $this->processArrayInput($request->input('key_highlights', []));
+        $validated['best_for_tags'] = $this->processArrayInput($request->input('best_for_tags', []));
+        $validated['attractions_details'] = $this->processAttractionsDetails($request);
+        $validated['popular_places'] = $this->processPopularPlaces($request);
+        $validated['hotels_data'] = $this->processHotelsData($request);
+        $validated['nearby_areas_detailed'] = $this->processNearbyAreasDetailed($request);
+        $validated['more_nearby_destinations'] = $this->processMoreDestinations($request);
+        $validated['travel_tips_faq'] = $this->processTravelTipsFaq($request);
+        
+        // Process gallery images
+        $galleryImages = $request->input('gallery_images', []);
+        $galleryAltTexts = $request->input('gallery_alt_text', []);
+        $validated['gallery_images'] = $this->processGalleryImages($galleryImages, $galleryAltTexts);
+        
+        // Process quick facts
+        $validated['quick_facts'] = [
+            'language' => $request->input('quick_facts.language', ''),
+            'time_zone' => $request->input('quick_facts.time_zone', ''),
+            'currency' => $request->input('quick_facts.currency', ''),
+            'emergency' => $request->input('quick_facts.emergency', ''),
+            'voltage' => $request->input('quick_facts.voltage', ''),
+            'climate' => $request->input('quick_facts.climate', ''),
+        ];
 
         Destination::create($validated);
 
@@ -144,11 +167,11 @@ class DestinationController extends Controller
             'price' => 'required|integer|min:0',
             'rating' => 'nullable|numeric|min:0|max:5',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            
-            // ✅ 'string' validation HATA DEIN
+            'hero_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'hero_title' => 'nullable|string|max:255',
+            'hero_subtitle' => 'nullable|string|max:255',
             'description' => 'required',
             'overview' => 'nullable',
-            
             'hotels_count' => 'nullable|integer|min:0',
             'best_time' => 'nullable|string|max:100',
             'ideal_duration' => 'nullable|string|max:50',
@@ -161,7 +184,7 @@ class DestinationController extends Controller
             $validated['slug'] = Str::slug($request->name);
         }
 
-        // Handle image upload
+        // Handle main image upload
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if ($destination->image && Storage::disk('public')->exists($destination->image)) {
@@ -172,17 +195,53 @@ class DestinationController extends Controller
             $validated['image'] = $imagePath;
         }
 
-        // ✅ Handle HTML content (SAFELY)
+        // Handle hero image upload
+        if ($request->hasFile('hero_image')) {
+            // Delete old hero image if exists
+            if ($destination->hero_image && Storage::disk('public')->exists($destination->hero_image)) {
+                Storage::disk('public')->delete($destination->hero_image);
+            }
+            
+            $heroImagePath = $request->file('hero_image')->store('destinations/hero', 'public');
+            $validated['hero_image'] = $heroImagePath;
+        }
+
+        // Handle HTML content (SAFELY)
         $validated['description'] = strip_tags($request->description, 
             '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><span><div>');
         
         $validated['overview'] = strip_tags($request->overview,
             '<p><strong><b><em><i><u><a><br><ul><ol><li><h1><h2><h3><h4><h5><h6><img><table><tr><td><th><div><span>');
 
-        // Handle JSON fields
+        // Handle basic JSON fields
         $validated['attractions'] = $this->processArrayInput($request->input('attractions', []));
         $validated['nearby_areas'] = $this->processArrayInput($request->input('nearby_areas', []));
         $validated['travel_tips'] = $this->processArrayInput($request->input('travel_tips', []));
+
+        // Process new dynamic fields
+        $validated['key_highlights'] = $this->processArrayInput($request->input('key_highlights', []));
+        $validated['best_for_tags'] = $this->processArrayInput($request->input('best_for_tags', []));
+        $validated['attractions_details'] = $this->processAttractionsDetails($request);
+        $validated['popular_places'] = $this->processPopularPlaces($request);
+        $validated['hotels_data'] = $this->processHotelsData($request);
+        $validated['nearby_areas_detailed'] = $this->processNearbyAreasDetailed($request);
+        $validated['more_nearby_destinations'] = $this->processMoreDestinations($request);
+        $validated['travel_tips_faq'] = $this->processTravelTipsFaq($request);
+        
+        // Process gallery images
+        $galleryImages = $request->input('gallery_images', []);
+        $galleryAltTexts = $request->input('gallery_alt_text', []);
+        $validated['gallery_images'] = $this->processGalleryImages($galleryImages, $galleryAltTexts);
+        
+        // Process quick facts
+        $validated['quick_facts'] = [
+            'language' => $request->input('quick_facts.language', ''),
+            'time_zone' => $request->input('quick_facts.time_zone', ''),
+            'currency' => $request->input('quick_facts.currency', ''),
+            'emergency' => $request->input('quick_facts.emergency', ''),
+            'voltage' => $request->input('quick_facts.voltage', ''),
+            'climate' => $request->input('quick_facts.climate', ''),
+        ];
 
         $destination->update($validated);
 
@@ -195,9 +254,14 @@ class DestinationController extends Controller
      */
     public function destroy(Destination $destination)
     {
-        // Delete image if exists
+        // Delete main image if exists
         if ($destination->image && Storage::disk('public')->exists($destination->image)) {
             Storage::disk('public')->delete($destination->image);
+        }
+        
+        // Delete hero image if exists
+        if ($destination->hero_image && Storage::disk('public')->exists($destination->hero_image)) {
+            Storage::disk('public')->delete($destination->hero_image);
         }
 
         $destination->delete();
@@ -212,6 +276,164 @@ class DestinationController extends Controller
     private function processArrayInput(array $input): array
     {
         return array_filter(array_map('trim', $input));
+    }
+
+    /**
+     * Process attractions details
+     */
+    private function processAttractionsDetails(Request $request): array
+    {
+        $attractions = $request->input('attractions_details', []);
+        $result = [];
+        
+        foreach ($attractions as $attraction) {
+            if (!empty($attraction['name'])) {
+                $result[] = [
+                    'name' => $attraction['name'] ?? '',
+                    'location' => $attraction['location'] ?? '',
+                    'rating' => floatval($attraction['rating'] ?? 0),
+                    'description' => $attraction['description'] ?? '',
+                    'image' => $attraction['image'] ?? '',
+                    'button_text' => $attraction['button_text'] ?? 'View Details',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process popular places
+     */
+    private function processPopularPlaces(Request $request): array
+    {
+        $places = $request->input('popular_places', []);
+        $result = [];
+        
+        foreach ($places as $place) {
+            if (!empty($place['name'])) {
+                $result[] = [
+                    'icon' => $place['icon'] ?? 'fas fa-map-pin',
+                    'name' => $place['name'] ?? '',
+                    'description' => $place['description'] ?? '',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process hotels data
+     */
+    private function processHotelsData(Request $request): array
+    {
+        $hotels = $request->input('hotels_data', []);
+        $result = [];
+        
+        foreach ($hotels as $hotel) {
+            if (!empty($hotel['name'])) {
+                $result[] = [
+                    'name' => $hotel['name'] ?? '',
+                    'location' => $hotel['location'] ?? '',
+                    'price' => intval($hotel['price'] ?? 0),
+                    'rating' => floatval($hotel['rating'] ?? 0),
+                    'recommendation' => intval($hotel['recommendation'] ?? 0),
+                    'features' => !empty($hotel['features']) ? 
+                        array_map('trim', explode(',', $hotel['features'])) : [],
+                    'image' => $hotel['image'] ?? '',
+                    'button_text' => $hotel['button_text'] ?? 'View Details',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process nearby areas detailed
+     */
+    private function processNearbyAreasDetailed(Request $request): array
+    {
+        $areas = $request->input('nearby_areas_detailed', []);
+        $result = [];
+        
+        foreach ($areas as $area) {
+            if (!empty($area['name'])) {
+                $result[] = [
+                    'name' => $area['name'] ?? '',
+                    'distance' => $area['distance'] ?? '',
+                    'description' => $area['description'] ?? '',
+                    'image' => $area['image'] ?? '',
+                    'drive_time' => $area['drive_time'] ?? '',
+                    'button_text' => $area['button_text'] ?? 'Explore',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process more destinations
+     */
+    private function processMoreDestinations(Request $request): array
+    {
+        $destinations = $request->input('more_nearby_destinations', []);
+        $result = [];
+        
+        foreach ($destinations as $dest) {
+            if (!empty($dest['name'])) {
+                $result[] = [
+                    'icon' => $dest['icon'] ?? 'fas fa-location-dot',
+                    'name' => $dest['name'] ?? '',
+                    'distance' => $dest['distance'] ?? '',
+                    'category' => $dest['category'] ?? '',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process travel tips FAQ
+     */
+    private function processTravelTipsFaq(Request $request): array
+    {
+        $tips = $request->input('travel_tips_faq', []);
+        $result = [];
+        
+        foreach ($tips as $tip) {
+            if (!empty($tip['title'])) {
+                $result[] = [
+                    'icon' => $tip['icon'] ?? 'fas fa-info-circle',
+                    'title' => $tip['title'] ?? '',
+                    'content' => $tip['content'] ?? '',
+                ];
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Process gallery images
+     */
+    private function processGalleryImages(array $images, array $altTexts): array
+    {
+        $result = [];
+        
+        for ($i = 0; $i < count($images); $i++) {
+            if (!empty($images[$i])) {
+                $result[] = [
+                    'url' => $images[$i],
+                    'alt' => $altTexts[$i] ?? 'Gallery Image',
+                ];
+            }
+        }
+        
+        return $result;
     }
 
     /**
