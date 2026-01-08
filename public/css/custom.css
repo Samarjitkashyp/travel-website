@@ -78,6 +78,107 @@ body {
     padding: 20px;
 }
 
+.destination-hero .container .price_wraper{
+    background-color: #e74c3c !important;
+    color: #fff !important;
+}
+
+/* hero Right-quick info */
+.destination-hero .container .her-quickinfo-wrapper .card-body{
+    background-color: #e74c3c !important;
+    border-radius: 8px !important;
+    border: none !important;
+}
+
+/* Destination Single Page Style */
+/* Hero Banner */
+
+.destination-hero .card-body .card-title .fa-info-circle{
+    color: #fff;
+}
+
+.destination-hero .card-body .card-title{
+    color: #fff;
+}
+
+.destination-hero .card-body p{
+    color: #fff;
+}
+
+/* Overview */
+#overview .card-body .summernote-content p b{
+    color: #e74c3c;
+}
+
+/* Overview Best for Tags */
+#overview .card-body .badge {
+    background-color: #e74c3c !important;
+    color: #fff !important;
+}
+
+/* Top Attraction Section */
+#attractions .card-body .attractions-carousel .owl-item .attraction-card img{
+    height: 220px !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+}
+
+#attractions .card-body .attractions-carousel .owl-item .attraction-card .card-body .card-title{
+    border-left: 4px solid #e74c3c !important;
+    padding: 0px 0px 0px 10px !important;
+    line-height: 20px !important;
+}
+
+#attractions .card-body .attractions-carousel .owl-item .attraction-card .card-body{
+    padding: 20px 20px 20px 0px !important;
+}
+
+/* Other Popular Places */
+#attractions .card-body .card_wrapper .card_wrapper_inner{
+    border: 1px solid #e74c3c !important;
+}
+
+/* Nearby Hotels Section */
+#hotels .card-body .hotel-listing-card{
+    border: 1px solid #e74c3c !important;
+}
+
+/* Nearby Areas */
+#areas .card-body .areas-swiper .swiper-wrapper .area-card img{
+    height: 200px;
+    object-fit: cover;
+    border-radius: 6px !important;
+}
+
+#areas .card-body .areas-swiper .swiper-wrapper .area-card .card-body{
+    padding: 20px 20px 20px 0px !important;
+}
+
+#areas .card-body .areas-swiper .swiper-wrapper .area-card .card-body .card-title{
+    border-left: 4px solid #e74c3c !important;
+    padding-left: 10px !important;
+    line-height: 20px !important;
+}
+
+#areas .card-body .areas-swiper .swiper-wrapper .area-card .card-body p i{
+    color: #e74c3c !important;
+}
+
+/* Main Left Sidebar Style */
+.sidebar_destination_wrapper .sticky-top .card-body .list-group .active i{
+    color: #fff !important;
+}
+.sidebar_destination_wrapper .sticky-top .card-body .list-group .active{
+    background-color: #e74c3c !important;
+    color: #fff !important;
+}
+
+/* Quick Contact Sidebar */
+.sidebar_destination_wrapper .sticky-top .quick-contact_wrapper .card-body{
+    border: 1px dashed #e74c3c !important;
+    border-radius: 8px !important;
+}
+
 /* Search Box */
 .search-box {
     background: rgba(255,255,255,0.95);

@@ -36,12 +36,12 @@
                             <span class="badge bg-success fs-6 p-2">
                                 <i class="fas fa-star me-2"></i>{{ $destination->rating ?? '4.5' }}/5 Rating
                             </span>
-                            <span class="badge bg-info fs-6 p-2">
+                            <span class="badge bg-info fs-6 p-2 price_wraper">
                                 <i class="fas fa-rupee-sign me-2"></i>₹{{ number_format($destination->price) }}
                             </span>
                         </div>
                     </div>
-                    <div class="col-lg-4 text-white pb-5">
+                    <div class="col-lg-4 text-white pb-5 her-quickinfo-wrapper">
                         <div class="card bg-dark bg-opacity-75 border-0 shadow-lg">
                             <div class="card-body">
                                 <h5 class="card-title">
@@ -80,7 +80,7 @@
     <div class="container py-5">
         <div class="row">
             <!-- Left Sidebar - Table of Contents -->
-            <div class="col-lg-3 mb-4">
+            <div class="col-lg-3 mb-4 sidebar_destination_wrapper">
                 <div class="sticky-top" style="top: 100px;">
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-primary text-white">
@@ -121,7 +121,7 @@
                     </div>
 
                     <!-- Quick Contact -->
-                    <div class="card border-0 shadow-sm">
+                    <div class="card border-0 shadow-sm quick-contact_wrapper">
                         <div class="card-body">
                             <h6 class="card-title mb-3">
                                 <i class="fas fa-headset me-2 text-primary"></i>Need Help?
@@ -263,8 +263,8 @@
                                 <h5 class="mb-3">Other Popular Places</h5>
                                 <div class="row">
                                     @foreach($destination->popular_places as $place)
-                                    <div class="col-md-6 mb-3">
-                                        <div class="d-flex align-items-start p-3 border rounded">
+                                    <div class="col-md-6 mb-3 card_wrapper">
+                                        <div class="d-flex align-items-start p-3 border rounded card_wrapper_inner">
                                             <div class="flex-shrink-0">
                                                 <i class="{{ $place['icon'] ?? 'fas fa-map-pin' }} text-primary fa-2x me-3"></i>
                                             </div>
